@@ -3,6 +3,11 @@
   require "../config/config.php";
 ?>
 <?php
+
+	if(isset($_SESSION['user_name'])){
+		header("location: ".APPURl."");
+	}
+
     if(isset($_POST['submit'])){
       if(empty($_POST['user_email']) || empty($_POST['user_pass']) ){
         echo "<script> alert('one or more infield are empty') </script>";
@@ -19,10 +24,12 @@
 
           if(password_verify($user_pass, $fetch['user_pass'])){
             //start session
+			$_SESSION['user_name'] = $fetch['user_name'];
+			$_SESSION['user_email'] = $fetch['user_email'];
+			$_SESSION['user_id'] = $fetch['ID'];
+
+
             header("location: ".APPURl."");
-
-
-
           }else{
             echo "<script> alert('Email or pass is Wrong !!');</script>";
           }

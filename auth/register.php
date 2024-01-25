@@ -3,6 +3,10 @@
   require "../config/config.php";
 ?>
 <?php
+
+  if(isset($_SESSION['user_name'])){
+    header("location: ".APPURl."");
+  }
   if(isset($_POST['submit'])){
     if(empty($_POST['user_name']) || empty($_POST['user_email']) || empty($_POST['user_pass']) ){
       echo "<script> alert('one or more infield are empty') </script>";
