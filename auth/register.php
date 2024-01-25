@@ -71,7 +71,7 @@
                 <div class="col-md-12">
                 	<div class="form-group mt-4">
 							<div class="radio">
-                <button class="btn btn-primary py-3 px-4" name="submit">Register</button>
+                <button class="btn btn-primary py-3 px-4" name="submit" type="submit">Register</button>
 						  </div>
 					</div>
                 </div>
