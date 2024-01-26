@@ -4,15 +4,41 @@
 ?>
 <?php
 	if(isset($_GET['id'])){
-		$product_id = $_GET['id'];
 
+		//code for single product
+		$product_id = $_GET['id'];
 		$product = $conn->query("SELECT * FROM product WHERE ID = '$product_id'");
 		$product->execute();
 		$single_product = $product->fetch(PDO::FETCH_OBJ);
 
-		$related_product = $conn->query("SELECT * FROM product WHERE type = '$single_product->type' AND ID != '$product_id'");
+		//code for related product
+		$related_product = $conn->query("SELECT * FROM product WHERE type = '$single_product->type' AND ID != '$product_id' LIMIT 4");
 		$related_product->execute();
 		$related_product_details = $related_product->fetchAll(PDO::FETCH_OBJ);
+
+		//code for ADD to Cart
+		if(isset($_POST['submit'])){
+			$product_title = $_POST['product_title'];
+			$product_image = $_POST['product_image'];
+			$product_price = $_POST['product_price'];
+			$product_description = $_POST['product_description'];
+			$product_size = $_POST['product_size'];
+			$product_quantity = $_POST['product_quantity'];
+			$user_id = $_SESSION['user_id'];
+
+			$insert_cart = $conn->prepare("INSERT INTO cart(product_title, product_image, product_price, product_description, product_size,product_quantity, user_id)
+			VALUES(:product_title, :product_image, :product_price, :product_description, :product_size, :product_quantity, :user_id)");
+			$insert_cart->execute([
+				":product_title" => $product_title,
+				":product_image" => $product_image,
+				":product_price" => $product_price,
+				":product_description" => $product_description,
+				":product_size" => $product_size,
+				":product_quantity" => $product_quantity,
+				":user_id" => $user_id,
+			]);
+
+		}
 	}
 ?>
 
@@ -43,36 +69,44 @@
     				<h3><?php echo $single_product->product_title; ?></h3>
     				<p class="price"><span><?php echo $single_product->price; ?></span></p>
     				<p><?php echo $single_product->description; ?></p>
+					<form action="product-single.php?id=<?php echo $product_id; ?>" method="POST">
 					<div class="row mt-4">
 						<div class="col-md-6">
 							<div class="form-group d-flex">
-							<div class="select-wrap">
-								<div class="icon"><span class="ion-ios-arrow-down"></span></div>
-									<select name="" id="" class="form-control">
-									<option value="">Small</option>
-									<option value="">Medium</option>
-									<option value="">Large</option>
-									<option value="">Extra Large</option>
-									</select>
+								<div class="select-wrap">
+									<div class="icon"><span class="ion-ios-arrow-down"></span></div>
+										<select name="product_size" id="" class="form-control">
+											<option value="Small">Small</option>
+											<option value="Medium">Medium</option>
+											<option value="Large">Large</option>
+											<option value="Extra Large">Extra Large</option>
+										</select>
+									</div>
 								</div>
 							</div>
+
+							<div class="w-100"></div>
+							<div class="input-group col-md-6 d-flex mb-3">
+							<span class="input-group-btn mr-2">
+								<button type="button" class="quantity-left-minus btn"  data-type="minus" data-field="">
+									<i class="icon-minus"></i>
+								</button>
+							</span>
+							<input type="text" id="quantity" name="product_quantity" class="form-control input-number" value="1" min="1" max="100">
+							<span class="input-group-btn ml-2">
+								<button type="button" class="quantity-right-plus btn" data-type="plus" data-field="">
+									<i class="icon-plus"></i>
+								</button>
+							</span>
 						</div>
-						<div class="w-100"></div>
-						<div class="input-group col-md-6 d-flex mb-3">
-						<span class="input-group-btn mr-2">
-							<button type="button" class="quantity-left-minus btn"  data-type="minus" data-field="">
-								<i class="icon-minus"></i>
-							</button>
-						</span>
-						<input type="text" id="quantity" name="quantity" class="form-control input-number" value="1" min="1" max="100">
-						<span class="input-group-btn ml-2">
-							<button type="button" class="quantity-right-plus btn" data-type="plus" data-field="">
-								<i class="icon-plus"></i>
-							</button>
-						</span>
-					</div>
-          		</div>
-          		<p><a href="cart.html" class="btn btn-primary py-3 px-5">Add to Cart</a></p>
+          			</div>
+					
+						<input name="product_title" type="text" value="<?php echo $single_product->product_title; ?>" style="display:none;">
+						<input name="product_image" type="text" value="<?php echo $single_product->image; ?>" style="display:none;">
+						<input name="product_price" type="text" value="<?php echo $single_product->price; ?>" style="display:none;">
+						<input name="product_description" type="text" value="<?php echo $single_product->description; ?>" style="display:none;">
+						<p><button type="submit" name="submit" class="btn btn-primary py-3 px-5">Add to Cart</button></p>
+					</form>
     			</div>
     		</div>
     	</div>
