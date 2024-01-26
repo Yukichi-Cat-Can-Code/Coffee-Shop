@@ -9,6 +9,10 @@
 		$product = $conn->query("SELECT * FROM product WHERE ID = '$product_id'");
 		$product->execute();
 		$single_product = $product->fetch(PDO::FETCH_OBJ);
+
+		$related_product = $conn->query("SELECT * FROM product WHERE type = '$single_product->type' AND ID != '$product_id'");
+		$related_product->execute();
+		$related_product_details = $related_product->fetchAll(PDO::FETCH_OBJ);
 	}
 ?>
 
@@ -33,7 +37,7 @@
     	<div class="container">
     		<div class="row">
     			<div class="col-lg-6 mb-5 ftco-animate">
-    				<a href="<?php echo APPURl ; ?>/images/<?php echo $single_product->image; ?>" class="image-popup"><img src="<?php echo APPURl ; ?>/images/menu-2.jpg" class="img-fluid" alt="Colorlib Template"></a>
+    				<a href="<?php echo APPURl ; ?>/images/<?php echo $single_product->image; ?>" class="image-popup"><img src="<?php echo APPURl ; ?>/images/<?php echo $single_product->image; ?>" class="img-fluid" alt="Colorlib Template"></a>
     			</div>
     			<div class="col-lg-6 product-details pl-md-5 ftco-animate">
     				<h3><?php echo $single_product->product_title; ?></h3>
@@ -84,50 +88,19 @@
           </div>
         </div>
         <div class="row">
+			<?php foreach($related_product_details as $all_related_product): ?>
         	<div class="col-md-3">
         		<div class="menu-entry">
-    					<a href="#" class="img" style="background-image: url(<?php echo APPURl ; ?>/images/menu-1.jpg);"></a>
+    					<a href="<?php echo APPURl ?>/products/product-single.php?id=<?php echo $all_related_product->ID; ?>" class="img" style="background-image: url('<?php echo APPURl ; ?>/images/<?php echo $all_related_product->image; ?>')"></a>
     					<div class="text text-center pt-4">
-    						<h3><a href="#">Coffee Capuccino</a></h3>
-    						<p>A small river named Duden flows by their place and supplies</p>
-    						<p class="price"><span>$5.90</span></p>
-    						<p><a href="#" class="btn btn-primary btn-outline-primary">Add to Cart</a></p>
+    						<h3><a href="<?php echo APPURl ?>/products/product-single.php?id=<?php echo $all_related_product->ID; ?>"><?php echo $all_related_product->product_title; ?></a></h3>
+    						<p><?php echo $all_related_product->description; ?></p>
+    						<p class="price"><span><?php echo $all_related_product->price; ?></span></p>
+    						<p><a href="<?php echo APPURl ?>/products/product-single.php?id=<?php echo $all_related_product->ID; ?>" class="btn btn-primary btn-outline-primary">Show</a></p>
     					</div>
     				</div>
         	</div>
-        	<div class="col-md-3">
-        		<div class="menu-entry">
-    					<a href="#" class="img" style="background-image: url(<?php echo APPURl ; ?>/images/menu-2.jpg);"></a>
-    					<div class="text text-center pt-4">
-    						<h3><a href="#">Coffee Capuccino</a></h3>
-    						<p>A small river named Duden flows by their place and supplies</p>
-    						<p class="price"><span>$5.90</span></p>
-    						<p><a href="#" class="btn btn-primary btn-outline-primary">Add to Cart</a></p>
-    					</div>
-    				</div>
-        	</div>
-        	<div class="col-md-3">
-        		<div class="menu-entry">
-    					<a href="#" class="img" style="background-image: url(<?php echo APPURl ; ?>/images/menu-3.jpg);"></a>
-    					<div class="text text-center pt-4">
-    						<h3><a href="#">Coffee Capuccino</a></h3>
-    						<p>A small river named Duden flows by their place and supplies</p>
-    						<p class="price"><span>$5.90</span></p>
-    						<p><a href="#" class="btn btn-primary btn-outline-primary">Add to Cart</a></p>
-    					</div>
-    				</div>
-        	</div>
-        	<div class="col-md-3">
-        		<div class="menu-entry">
-    					<a href="#" class="img" style="background-image: url(<?php echo APPURl ; ?>/images/menu-4.jpg);"></a>
-    					<div class="text text-center pt-4">
-    						<h3><a href="#">Coffee Capuccino</a></h3>
-    						<p>A small river named Duden flows by their place and supplies</p>
-    						<p class="price"><span>$5.90</span></p>
-    						<p><a href="#" class="btn btn-primary btn-outline-primary">Add to Cart</a></p>
-    					</div>
-    				</div>
-        	</div>
+			<?php endforeach; ?>
         </div>
     	</div>
     </section>

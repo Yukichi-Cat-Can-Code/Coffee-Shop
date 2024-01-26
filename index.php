@@ -284,12 +284,12 @@
 				<?php foreach($all_product as $product): ?>
 					<div class="col-md-3">
 						<div class="menu-entry">
-								<a target="_blank" href="products/product-single.php?id=<?php echo $product->ID ?>" class="img" style="background-image: url('<?php echo APPURl ; ?>/images/<?php echo $product->image ?>')"></a>
+								<a target="_blank" href="products/product-single.php?id=<?php echo $product->ID ?>" class="img" style="background-image: url('<?php echo APPURl ; ?>/images/<?php echo $product->image; ?>')"></a>
 								<div class="text text-center pt-4">
 									<h3><a href="products/product-single.php?id=<?php echo $product->ID ?>"><?php echo $product->product_title; ?></a></h3>
 									<p><?php echo $product->description; ?></p>
 									<p class="price"><span><?php echo $product->price; ?></span></p>
-									<p><a target="_blank" href="products/product-single.php?id=<?php echo $product->ID ?>" class="btn btn-primary btn-outline-primary">Show</a></p>
+									<p><a target="_blank" href="products/product-single.php?id=<?php echo $product->ID; ?>" class="btn btn-primary btn-outline-primary">Show</a></p>
 								</div>
 							</div>
 					</div>
