@@ -26,8 +26,8 @@
 			$product_quantity = $_POST['product_quantity'];
 			$user_id = $_SESSION['user_id'];
 
-			$insert_cart = $conn->prepare("INSERT INTO cart(product_title, product_image, product_price, product_description, product_size,product_quantity, user_id)
-			VALUES(:product_title, :product_image, :product_price, :product_description, :product_size, :product_quantity, :user_id)");
+			$insert_cart = $conn->prepare("INSERT INTO cart(product_title, product_image, product_price, product_description, product_size,product_quantity, user_id,product_id)
+			VALUES(:product_title, :product_image, :product_price, :product_description, :product_size, :product_quantity, :user_id, :product_id)");
 			$insert_cart->execute([
 				":product_title" => $product_title,
 				":product_image" => $product_image,
@@ -36,9 +36,26 @@
 				":product_size" => $product_size,
 				":product_quantity" => $product_quantity,
 				":user_id" => $user_id,
+				":product_id" =>$product_id,
 			]);
 
 		}
+
+		//validation code for cart button
+		if(isset($_SESSION['user_id'])){
+			$cart_validation = $conn->query("SELECT * FROM cart WHERE product_id='$product_id' AND user_id='{$_SESSION["user_id"]}'");
+
+			$cart_validation->execute();
+
+			$cart_validation_rowcount = $cart_validation->rowcount();
+			$number_of_product = 0;
+			$number_of_product_in_cart = $cart_validation->fetchAll(PDO::FETCH_OBJ);
+			foreach($number_of_product_in_cart as $product_count){
+				$number_of_product += $product_count->product_quantity;
+				
+			}
+		}
+
 	}
 ?>
 
@@ -101,11 +118,16 @@
 						</div>
           			</div>
 					
-						<input name="product_title" type="text" value="<?php echo $single_product->product_title; ?>" style="display:none;">
-						<input name="product_image" type="text" value="<?php echo $single_product->image; ?>" style="display:none;">
-						<input name="product_price" type="text" value="<?php echo $single_product->price; ?>" style="display:none;">
-						<input name="product_description" type="text" value="<?php echo $single_product->description; ?>" style="display:none;">
-						<p><button type="submit" name="submit" class="btn btn-primary py-3 px-5 cart-btn" >Add to Cart</button></p>
+						<input name="product_title" type="hidden" value="<?php echo $single_product->product_title; ?>" >
+						<input name="product_image" type="hidden" value="<?php echo $single_product->image; ?>" >
+						<input name="product_price" type="hidden" value="<?php echo $single_product->price; ?>" >
+						<input name="product_description" type="hidden" value="<?php echo $single_product->description; ?>">
+						<?php if($cart_validation_rowcount > 0): ?>
+							<p><button type="submit" name="submit" class="btn btn-primary py-3 px-5 cart-btn" ><?php echo $number_of_product." in Cart" ?></button></p>
+						
+						<?php else: ?>
+							<p><button type="submit" name="submit" class="btn btn-primary py-3 px-5 cart-btn" >Add to Cart</button></p>
+						<?php endif; ?>
 					</form>
     			</div>
     		</div>
