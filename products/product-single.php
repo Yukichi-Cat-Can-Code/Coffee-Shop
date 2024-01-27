@@ -122,11 +122,15 @@
 						<input name="product_image" type="hidden" value="<?php echo $single_product->image; ?>" >
 						<input name="product_price" type="hidden" value="<?php echo $single_product->price; ?>" >
 						<input name="product_description" type="hidden" value="<?php echo $single_product->description; ?>">
-						<?php if($cart_validation_rowcount > 0): ?>
-							<p><button type="submit" name="submit" class="btn btn-primary py-3 px-5 cart-btn" ><?php echo $number_of_product." in Cart" ?></button></p>
-						
+						<?php if(isset($_SESSION['user_id'])): ?>
+							<?php if($cart_validation_rowcount > 0): ?>
+								<p><button type="submit" name="submit" class="btn btn-primary py-3 px-5 cart-btn" ><?php echo $number_of_product." in Cart" ?></button></p>
+							
+							<?php else: ?>
+								<p><button type="submit" name="submit" class="btn btn-primary py-3 px-5 cart-btn" >Add to Cart</button></p>
+							<?php endif; ?>
 						<?php else: ?>
-							<p><button type="submit" name="submit" class="btn btn-primary py-3 px-5 cart-btn" >Add to Cart</button></p>
+							<p><a href="<?php echo APPURl; ?>/auth/login.php" class="btn btn-primary py-3 px-5 cart-btn" >Login</a></p>
 						<?php endif; ?>
 					</form>
     			</div>
