@@ -32,6 +32,7 @@
     <link rel="stylesheet" href="<?php echo APPURl ?>/css/flaticon.css">
     <link rel="stylesheet" href="<?php echo APPURl ?>/css/icomoon.css">
     <link rel="stylesheet" href="<?php echo APPURl ?>/css/style.css">
+    <link rel="stylesheet" href="<?php echo APPURl ?>/css/custom.css">
   </head>
   <body>
   	<nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">

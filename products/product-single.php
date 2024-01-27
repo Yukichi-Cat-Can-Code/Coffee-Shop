@@ -105,7 +105,7 @@
 						<input name="product_image" type="text" value="<?php echo $single_product->image; ?>" style="display:none;">
 						<input name="product_price" type="text" value="<?php echo $single_product->price; ?>" style="display:none;">
 						<input name="product_description" type="text" value="<?php echo $single_product->description; ?>" style="display:none;">
-						<p><button type="submit" name="submit" class="btn btn-primary py-3 px-5">Add to Cart</button></p>
+						<p><button type="submit" name="submit" class="btn btn-primary py-3 px-5 cart-btn" >Add to Cart</button></p>
 					</form>
     			</div>
     		</div>
