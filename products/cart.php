@@ -8,7 +8,7 @@
 <?php
 
 	$user_id = $_SESSION['user_id'];
-	$cart = $conn->query("SELECT product_id, MAX(product_title) AS product_title, MAX(SUBSTRING_INDEX(product_description, ' ', 10)) AS product_description, MAX(product_image) AS product_image, MAX(product_price) AS product_price, SUM(product_quantity) AS total_quantity,user_id FROM cart WHERE user_id = '$user_id' GROUP BY product_id, user_id;");
+	$cart = $conn->query("SELECT ID, product_id, MAX(product_title) AS product_title, MAX(SUBSTRING_INDEX(product_description, ' ', 10)) AS product_description, MAX(product_image) AS product_image, MAX(product_price) AS product_price, SUM(product_quantity) AS total_quantity,user_id FROM cart WHERE user_id = '$user_id' GROUP BY product_id, user_id;");
 	$cart->execute();
 	$cart_product = $cart->fetchAll(PDO::FETCH_OBJ);
 
@@ -56,7 +56,7 @@
 						<tbody>
 						<?php foreach($cart_product as $cart_product ): ?>
 							<tr class="text-center">
-							<td class="product-remove"><a href="delete-product.php?product_id = <?php echo $cart_product->ID ?>"><span class="icon-close"></span></a></td>
+							<td class="product-remove"><a href="delete-product.php?product_id=<?php echo $cart_product->product_id ?>"><span class="icon-close"></span></a></td>
 							
 							<td class="image-prod"><div class="img" style="background-image:url(<?php echo APPURl ?>/images/<?php echo $cart_product ->product_image ?>);"></div></td>
 							
