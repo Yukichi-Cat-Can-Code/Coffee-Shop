@@ -84,7 +84,7 @@
     			</div>
     			<div class="col-lg-6 product-details pl-md-5 ftco-animate">
     				<h3><?php echo $single_product->product_title; ?></h3>
-    				<p class="price"><span><?php echo $single_product->price; ?></span></p>
+    				<p class="price"><span><?php echo "$".$single_product->price; ?></span></p>
     				<p><?php echo $single_product->description; ?></p>
 					<form action="product-single.php?id=<?php echo $product_id; ?>" method="POST">
 					<div class="row mt-4">
