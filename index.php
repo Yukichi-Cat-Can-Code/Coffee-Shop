@@ -4,7 +4,7 @@
 	require "config/config.php";
 ?>
 <?php
-	$product = $conn->query("SELECT * FROM product");
+	$product = $conn->query("SELECT ID, product_title, image, SUBSTRING_INDEX(description, ' ', 10) AS description, price, type FROM product LIMIT 4");
 	$product->execute();
 	$all_product = $product->fetchAll(PDO::FETCH_OBJ);
 

@@ -12,7 +12,7 @@
 		$single_product = $product->fetch(PDO::FETCH_OBJ);
 
 		//code for related product
-		$related_product = $conn->query("SELECT * FROM product WHERE type = '$single_product->type' AND ID != '$product_id' LIMIT 4");
+		$related_product = $conn->query("SELECT ID, product_title, image, SUBSTRING_INDEX(description, ' ', 10) AS description, price, type FROM product WHERE type = '$single_product->type' AND ID != '$product_id' LIMIT 4");
 		$related_product->execute();
 		$related_product_details = $related_product->fetchAll(PDO::FETCH_OBJ);
 
@@ -154,7 +154,7 @@
     					<a href="<?php echo APPURl ?>/products/product-single.php?id=<?php echo $all_related_product->ID; ?>" class="img" style="background-image: url('<?php echo APPURl ; ?>/images/<?php echo $all_related_product->image; ?>')"></a>
     					<div class="text text-center pt-4">
     						<h3><a href="<?php echo APPURl ?>/products/product-single.php?id=<?php echo $all_related_product->ID; ?>"><?php echo $all_related_product->product_title; ?></a></h3>
-    						<p><?php echo $all_related_product->description; ?></p>
+    						<p><?php echo $all_related_product->description; ?> . . . .</p>
     						<p class="price"><span><?php echo $all_related_product->price; ?></span></p>
     						<p><a href="<?php echo APPURl ?>/products/product-single.php?id=<?php echo $all_related_product->ID; ?>" class="btn btn-primary btn-outline-primary">Show</a></p>
     					</div>

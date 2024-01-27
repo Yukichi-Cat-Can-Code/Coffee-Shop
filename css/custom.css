@@ -1,6 +1,5 @@
 .product-details button:last-child {
   color: #000 !important;
-  background-color: #f8b500 !important;
 }
 .product-details button:last-child:hover {
   color: #c49b63 !important;

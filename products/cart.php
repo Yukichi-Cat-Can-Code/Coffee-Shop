@@ -8,7 +8,7 @@
 <?php
 
 	$user_id = $_SESSION['user_id'];
-	$cart = $conn->query("SELECT * FROM cart WHERE user_id='$user_id'");
+	$cart = $conn->query("SELECT product_id, MAX(product_title) AS product_title, MAX(SUBSTRING_INDEX(product_description, ' ', 10)) AS product_description, MAX(product_image) AS product_image, MAX(product_price) AS product_price, SUM(product_quantity) AS total_quantity,user_id FROM cart WHERE user_id = '$user_id' GROUP BY product_id, user_id;");
 	$cart->execute();
 	$cart_product = $cart->fetchAll(PDO::FETCH_OBJ);
 
@@ -62,18 +62,18 @@
 							
 							<td class="product-name">
 								<h3><?php echo $cart_product ->product_title ?></h3>
-								<p><?php echo $cart_product->product_description ?></p>
+								<p><?php echo $cart_product->product_description ?>. . . . .</p>
 							</td>
 							
 							<td class="price"><?php echo $cart_product->product_price ?></td>
 							
 							<td>
 								<div class="input-group mb-3">
-									<input disabled type="text" name="quantity" class="quantity form-control input-number" value="<?php echo $cart_product->product_quantity ?>" min="1" max="100">
+									<input disabled type="text" name="quantity" class="quantity form-control input-number" value="<?php echo $cart_product->total_quantity ?>" min="1" max="100">
 									</div>
 							</td>
 							
-							<td class="total"><?php echo $cart_product->product_price*$cart_product->product_quantity ?> </td>
+							<td class="total"><?php echo $cart_product->product_price*$cart_product->total_quantity ?> </td>
 							</tr><!-- END TR-->
 						<?php endforeach; ?>
 						</tbody>
