@@ -17,6 +17,12 @@
 	$cart_total->execute();
 	$total_cart_product = $cart_total->fetch(PDO::FETCH_OBJ);
 
+	//proceed to checkout
+	if(isset($_GET['total_cost'])){
+		$_SESSION['payable_total_cost'] = $_GET['total_cost'];
+		header("location: checkout.php");
+	}
+
 
 ?>
 
@@ -109,13 +115,15 @@
 					<p class="d-flex total-price">
 						<span>Total</span>
 						<?php if($total_cart_product->total > 0): ?>
-							<span>$<?php echo ($total_cart_product->total + 3) - 5; ?>.00</span>
+							<?php $total_cost = ($total_cart_product->total + 3) - 5; ?>
+							<span>$<?php echo $total_cost; ?>.00</span>
 						<?php else: ?>
-							<span>$<?php echo $total_cart_product->total; ?>.00</span>
+							<?php $total_cost = 0; ?>
+							<span>$<?php echo $total_cost; ?>.00</span>
 						<?php endif; ?>
 					</p>
 				</div>
-				<p class="text-center"><a href="checkout.html" class="btn btn-primary py-3 px-4">Proceed to Checkout</a></p>
+				<p class="text-center"><a href="cart.php?total_cost=<?php echo $total_cost; ?>" class="btn btn-primary py-3 px-4">Proceed to Checkout</a></p>
 			</div>
 		</div>
 		</div>
