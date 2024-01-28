@@ -91,16 +91,28 @@
 					</p>
 					<p class="d-flex">
 						<span>Delivery</span>
-						<span>$3.00</span>
+						<?php if($total_cart_product->total > 0): ?>
+							<span>$3.00</span>
+						<?php else: ?>
+							<span>$0.00</span>
+						<?php endif; ?>
 					</p>
 					<p class="d-flex">
 						<span>Discount</span>
-						<span>$5.00</span>
+						<?php if($total_cart_product->total > 0): ?>
+							<span>$5.00</span>
+						<?php else: ?>
+							<span>$0.00</span>
+						<?php endif; ?>
 					</p>
 					<hr>
 					<p class="d-flex total-price">
 						<span>Total</span>
-						<span>$<?php echo ($total_cart_product->total + 3) - 5; ?>.00</span>
+						<?php if($total_cart_product->total > 0): ?>
+							<span>$<?php echo ($total_cart_product->total + 3) - 5; ?>.00</span>
+						<?php else: ?>
+							<span>$<?php echo $total_cart_product->total; ?>.00</span>
+						<?php endif; ?>
 					</p>
 				</div>
 				<p class="text-center"><a href="checkout.html" class="btn btn-primary py-3 px-4">Proceed to Checkout</a></p>
