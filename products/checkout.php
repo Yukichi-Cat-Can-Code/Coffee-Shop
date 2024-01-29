@@ -5,40 +5,45 @@
 	require "../auth/not-access.php";
 ?>
 <?php
-if (isset($_POST['submit'])) {
-    $firstname = $_POST['firstname'];
-    $lastname = $_POST['lastname'];
-    $streetaddress = $_POST['streetaddress'];
-    $Appartment = $_POST['Appartment'];
-    $towncity = $_POST['towncity'];
-    $postcodezip = $_POST['postcodezip'];
-    $phone = $_POST['phone'];
-    $emailaddress = $_POST['emailaddress'];
-    $payable_total_cost = $_SESSION['payable_total_cost'];
-    $user_id = $_SESSION['user_id'];
 
-    if (empty($firstname) || empty($lastname) || empty($streetaddress) || empty($towncity) || empty($postcodezip) || empty($phone) || empty($emailaddress)) {
-        echo "<script> alert('one or more field are empty !!');</script>";
-    } else {
-        $place_order_query = $conn->prepare("INSERT INTO orders(firstname, lastname, streetaddress, appartment, towncity, postcode, phone, email, payable_total_cost, user_id)
-            VALUES(:firstname, :lastname, :streetaddress, :appartment, :towncity, :postcode, :phone, :email, :payable_total_cost, :user_id)");
+	if(!isset($_SERVER['HTTP_REFERER'])){
+		header("location:".APPURl."");
+		exit;
+	}
+	if (isset($_POST['submit'])) {
+		$firstname = $_POST['firstname'];
+		$lastname = $_POST['lastname'];
+		$streetaddress = $_POST['streetaddress'];
+		$Appartment = $_POST['Appartment'];
+		$towncity = $_POST['towncity'];
+		$postcodezip = $_POST['postcodezip'];
+		$phone = $_POST['phone'];
+		$emailaddress = $_POST['emailaddress'];
+		$payable_total_cost = $_SESSION['payable_total_cost'];
+		$user_id = $_SESSION['user_id'];
 
-        $place_order_query->execute([
-            ":firstname" => $firstname,
-            ":lastname" => $lastname,
-            ":streetaddress" => $streetaddress,
-            ":appartment" => $Appartment,
-            ":towncity" => $towncity,
-            ":postcode" => $postcodezip,
-            ":phone" => $phone,
-            ":email" => $emailaddress,
-            ":payable_total_cost" => $payable_total_cost,
-            ":user_id" => $user_id,
-        ]);
+		if (empty($firstname) || empty($lastname) || empty($streetaddress) || empty($towncity) || empty($postcodezip) || empty($phone) || empty($emailaddress)) {
+			echo "<script> alert('one or more field are empty !!');</script>";
+		} else {
+			$place_order_query = $conn->prepare("INSERT INTO orders(firstname, lastname, streetaddress, appartment, towncity, postcode, phone, email, payable_total_cost, user_id)
+				VALUES(:firstname, :lastname, :streetaddress, :appartment, :towncity, :postcode, :phone, :email, :payable_total_cost, :user_id)");
 
-        header("location: pay.php");
-    }
-}
+			$place_order_query->execute([
+				":firstname" => $firstname,
+				":lastname" => $lastname,
+				":streetaddress" => $streetaddress,
+				":appartment" => $Appartment,
+				":towncity" => $towncity,
+				":postcode" => $postcodezip,
+				":phone" => $phone,
+				":email" => $emailaddress,
+				":payable_total_cost" => $payable_total_cost,
+				":user_id" => $user_id,
+			]);
+
+			header("location: pay.php");
+		}
+	}
 ?>
 
 

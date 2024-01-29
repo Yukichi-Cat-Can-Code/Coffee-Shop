@@ -5,6 +5,10 @@
     require "../auth/not-access.php";
 ?>
 <?php
+	if(!isset($_SERVER['HTTP_REFERER'])){
+		header("location:".APPURl."");
+		exit;
+	}
     if(!isset($_SESSION['payable_total_cost'])){
         header("location:".APPURl." ");
     }
@@ -49,9 +53,6 @@
   </div>
 
 
-
-    <body>
-</html>
 
 
 

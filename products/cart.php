@@ -10,6 +10,7 @@
 	$user_id = $_SESSION['user_id'];
 	$cart = $conn->query("SELECT ID, product_id, MAX(product_title) AS product_title, MAX(SUBSTRING_INDEX(product_description, ' ', 10)) AS product_description, MAX(product_image) AS product_image, MAX(product_price) AS product_price, SUM(product_quantity) AS total_quantity,user_id FROM cart WHERE user_id = '$user_id' GROUP BY product_id, user_id;");
 	$cart->execute();
+	$cart_row_count = $cart->rowcount();
 	$cart_product = $cart->fetchAll(PDO::FETCH_OBJ);
 
 	//code for cart total
@@ -60,28 +61,34 @@
 							</tr>
 						</thead>
 						<tbody>
-						<?php foreach($cart_product as $cart_product ): ?>
+						<?php if($cart_row_count == 0 ): ?>
 							<tr class="text-center">
-							<td class="product-remove"><a href="delete-product.php?product_id=<?php echo $cart_product->product_id ?>"><span class="icon-close"></span></a></td>
-							
-							<td class="image-prod"><div class="img" style="background-image:url(<?php echo APPURl ?>/images/<?php echo $cart_product ->product_image ?>);"></div></td>
-							
-							<td class="product-name">
-								<h3><?php echo $cart_product ->product_title ?></h3>
-								<p><?php echo $cart_product->product_description ?>. . . . .</p>
-							</td>
-							
-							<td class="price"><?php echo $cart_product->product_price ?></td>
-							
-							<td>
-								<div class="input-group mb-3">
-									<input disabled type="text" name="quantity" class="quantity form-control input-number" value="<?php echo $cart_product->total_quantity ?>" min="1" max="100">
-									</div>
-							</td>
-							
-							<td class="total"><?php echo $cart_product->product_price*$cart_product->total_quantity ?> </td>
-							</tr><!-- END TR-->
-						<?php endforeach; ?>
+								<td>Your cart is empty please add product before you order</td>
+							</tr>
+						<?php else: ?>
+							<?php foreach($cart_product as $cart_product ): ?>
+								<tr class="text-center">
+								<td class="product-remove"><a href="delete-product.php?product_id=<?php echo $cart_product->product_id ?>"><span class="icon-close"></span></a></td>
+								
+								<td class="image-prod"><div class="img" style="background-image:url(<?php echo APPURl ?>/images/<?php echo $cart_product ->product_image ?>);"></div></td>
+								
+								<td class="product-name">
+									<h3><?php echo $cart_product ->product_title ?></h3>
+									<p><?php echo $cart_product->product_description ?>. . . . .</p>
+								</td>
+								
+								<td class="price">$<?php echo $cart_product->product_price ?></td>
+								
+								<td>
+									<div class="input-group mb-3">
+										<input disabled type="text" name="quantity" class="quantity form-control input-number" value="<?php echo $cart_product->total_quantity ?>" min="1" max="100">
+										</div>
+								</td>
+								
+								<td class="total">$<?php echo $cart_product->product_price*$cart_product->total_quantity ?> </td>
+								</tr><!-- END TR-->
+							<?php endforeach; ?>
+						<?php endif; ?>
 						</tbody>
 						</table>
 					</div>
@@ -123,7 +130,11 @@
 						<?php endif; ?>
 					</p>
 				</div>
-				<p class="text-center"><a href="cart.php?total_cost=<?php echo $total_cost; ?>" class="btn btn-primary py-3 px-4">Proceed to Checkout</a></p>
+				<?php if($cart_row_count == 0 ): ?>
+					<p class="text-center"><a class="btn btn-primary py-3 px-4" >Proceed to Checkout</a></p>
+				<?php else: ?>
+					<p class="text-center"><a href="cart.php?total_cost=<?php echo $total_cost; ?>" class="btn btn-primary py-3 px-4">Proceed to Checkout</a></p>
+				<?php endif; ?>
 			</div>
 		</div>
 		</div>
