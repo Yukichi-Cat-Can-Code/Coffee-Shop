@@ -4,13 +4,16 @@
 ?>
 <?php
 	if(isset($_GET['id'])){
+		
 
 		//code for single product
 		$product_id = $_GET['id'];
 		$product = $conn->query("SELECT * FROM product WHERE ID = '$product_id'");
 		$product->execute();
 		$single_product = $product->fetch(PDO::FETCH_OBJ);
-
+		if($product->rowcount() == 0){
+			header("location: ".APPURl."/404.php");
+		}
 		//code for related product
 		$related_product = $conn->query("SELECT ID, product_title, image, SUBSTRING_INDEX(description, ' ', 10) AS description, price, type FROM product WHERE type = '$single_product->type' AND ID != '$product_id' LIMIT 4");
 		$related_product->execute();
@@ -56,6 +59,8 @@
 			}
 		}
 
+	}else{
+		header("location:".APPURl."/404.php");
 	}
 ?>
 
