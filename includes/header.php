@@ -46,10 +46,10 @@
 	        <ul class="navbar-nav ml-auto">
 	          <li class="nav-item active"><a href="<?php echo APPURl; ?>" class="nav-link">Home</a></li>
 	          <li class="nav-item"><a href="<?php echo APPURl ?>/menu.php" class="nav-link">Menu</a></li>
-	          <li class="nav-item"><a href="<?php echo APPURl ?>/services.html" class="nav-link">Services</a></li>
-	          <li class="nav-item"><a href="<?php echo APPURl ?>/about.html" class="nav-link">About</a></li>
+	          <li class="nav-item"><a href="<?php echo APPURl ?>/services.php" class="nav-link">Services</a></li>
+	          <li class="nav-item"><a href="<?php echo APPURl ?>/about.php" class="nav-link">About</a></li>
 	         
-	          <li class="nav-item"><a href="contact.html" class="nav-link">Contact</a></li>
+	          <li class="nav-item"><a href="<?php echo APPURl; ?>/contact.php" class="nav-link">Contact</a></li>
            
             <?php if(isset($_SESSION['user_name'])): ?>
 
