@@ -64,8 +64,8 @@
                       <?php echo $_SESSION['user_name']; ?>
                       </a>
                       <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                        <li><a class="dropdown-item" href="#">Action</a></li>
-                        <li><a class="dropdown-item" href="#">Another action</a></li>
+                        <li><a class="dropdown-item" href="<?php echo APPURl; ?>/users/bookings.php">Bookings</a></li>
+                        <li><a class="dropdown-item" href="<?php echo APPURl; ?>/users/orders.php">Orders</a></li>
                         <li><a class="dropdown-item" href="<?php echo APPURl; ?>/auth/logout.php">Logout</a></li>
                       </ul>
                 </li>

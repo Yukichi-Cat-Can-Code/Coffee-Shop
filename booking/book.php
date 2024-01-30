@@ -1,5 +1,6 @@
 <?php
-    require "../includes/header.php";
+    session_start();
+    define("APPURl", "http://localhost/coffee-Shop");
     require "../config/config.php";
 
     $user_id = $_SESSION['user_id'];
@@ -21,8 +22,8 @@
 
             if($date > date("m/d/Y")){
 
-                $insert = $conn->prepare("INSERT INTO bookings(user_id, first_name, last_name, date, time, phone_number, message)
-                VALUES(:user_id, :first_name, :last_name, :date, :time, :phone_number, :message)");
+                $insert = $conn->prepare("INSERT INTO bookings(user_id, first_name, last_name, date, time, phone_number, message, status)
+                VALUES(:user_id, :first_name, :last_name, :date, :time, :phone_number, :message, :status)");
     
                 $insert->execute([
                     ":user_id" => $user_id,
@@ -31,10 +32,12 @@
                     ":date" => $date,
                     ":time" => $time,
                     ":phone_number" => $phone_number,
-                    ":message" => $message
+                    ":message" => $message,
+                    ":status" => "pending",
                 ]);
     
-                header("location: ".APPURl."");
+                header("location: http://localhost/coffee-Shop");
+                exit();
 
             }else{
 
