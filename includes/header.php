@@ -15,7 +15,7 @@
     <link href="https://fonts.googleapis.com/css?family=Josefin+Sans:400,700" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Great+Vibes" rel="stylesheet">
 
-    <link rel="stylesheet" href=" <?php echo APPURl ?>/css/open-iconic-bootstrap.min.css">
+    <link rel="stylesheet" href="<?php echo APPURl ?>/css/open-iconic-bootstrap.min.css">
     <link rel="stylesheet" href="<?php echo APPURl ?>/css/animate.css">
     
     <link rel="stylesheet" href="<?php echo APPURl ?>/css/owl.carousel.min.css">
@@ -38,7 +38,7 @@
   <body>
   	<nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
 	    <div class="container">
-	      <a class="navbar-brand" href="<?php echo APPURl?>">Coffee<small>Blend</small></a>
+	      <a class="navbar-brand" href="<?php echo APPURl; ?>">Coffee<small>Blend</small></a>
 	      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
 	        <span class="oi oi-menu"></span> Menu
 	      </button>
@@ -64,14 +64,14 @@
                       <?php echo $_SESSION['user_name']; ?>
                       </a>
                       <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                        <li><a class="dropdown-item" href="<?php echo APPURl; ?>/users/bookings.php">Bookings</a></li>
-                        <li><a class="dropdown-item" href="<?php echo APPURl; ?>/users/orders.php">Orders</a></li>
-                        <li><a class="dropdown-item" href="<?php echo APPURl; ?>/auth/logout.php">Logout</a></li>
+                        <li><a class="dropdown-item" href="<?php echo APPURl ?>/users/bookings.php">Bookings</a></li>
+                        <li><a class="dropdown-item" href="<?php echo APPURl ?>/users/orders.php">Orders</a></li>
+                        <li><a class="dropdown-item" href="<?php echo APPURl ?>/auth/logout.php">Logout</a></li>
                       </ul>
                 </li>
             <?php else: ?>
-                <li class="nav-item"><a href="<?php echo APPURl ?>/auth/login.php" class="nav-link">login</a></li>
-                <li class="nav-item"><a href="<?php echo APPURl ?>/auth/register.php" class="nav-link">register</a></li>
+                <li class="nav-item"><a href="<?php echo APPURl; ?>/auth/login.php" class="nav-link">login</a></li>
+                <li class="nav-item"><a href="<?php echo APPURl; ?>/auth/register.php" class="nav-link">register</a></li>
             <?php endif; ?>
 	        </ul>
 	      </div>

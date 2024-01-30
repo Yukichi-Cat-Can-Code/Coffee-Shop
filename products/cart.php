@@ -1,5 +1,5 @@
 <?php
-
+	ob_start();
 	require "../includes/header.php";
 	require "../config/config.php";
 	require "../auth/not-access.php";
@@ -22,6 +22,7 @@
 	if(isset($_GET['total_cost'])){
 		$_SESSION['payable_total_cost'] = $_GET['total_cost'];
 		header("location: checkout.php");
+		ob_end_flush();
 	}
 
 
@@ -29,14 +30,14 @@
 
     <section class="home-slider owl-carousel">
 
-      <div class="slider-item" style="background-image: url(<?php echo APPURl ?>/images/bg_3.jpg);" data-stellar-background-ratio="0.5">
+      <div class="slider-item" style="background-image: url(<?php echo APPURl; ?>/images/bg_3.jpg);" data-stellar-background-ratio="0.5">
       	<div class="overlay"></div>
         <div class="container">
           <div class="row slider-text justify-content-center align-items-center">
 
             <div class="col-md-7 col-sm-12 text-center ftco-animate">
             	<h1 class="mb-3 mt-5 bread">Cart</h1>
-	            <p class="breadcrumbs"><span class="mr-2"><a href="<?php echo APPURl ?>">Home</a></span> <span>Cart</span></p>
+	            <p class="breadcrumbs"><span class="mr-2"><a href="<?php echo APPURl; ?>">Home</a></span> <span>Cart</span></p>
             </div>
 
           </div>

@@ -40,7 +40,6 @@
 								<th>First Name</th>
 								<th>Last Name</th>
 								<th>Booking Date</th>
-								<th>Time</th>
 								<th>Phone Number</th>
 								<th>Message</th>
 								<th>Status</th>
@@ -55,7 +54,11 @@
 							<?php foreach($bookings_values as $bookings_values ): ?>
 								<tr class="text-center">
 									<td class="product-remove">
-										<a href="delete-bookings.php?booking_id=<?php echo $bookings_values->ID ?>"><span class="icon-close"></span></a>
+										<?php if($bookings_values->status == "approved"): ?>
+											<a><span class="icon-close"></span></a>
+										<?php else: ?>
+											<a href="delete-bookings.php?booking_id=<?php echo $bookings_values->ID ?>" style="curser: pointer;"><span class="icon-close"></span></a>
+										<?php endif; ?>
 									</td>
 									<td>
 										<p><?php echo $bookings_values ->first_name ?></p>
@@ -67,11 +70,8 @@
 									</td>
 									<td>
 										<p><?php echo $bookings_values ->date ?></p>
+										<p style="margin-top:-20px;"><?php echo $bookings_values->time ?></p>
 
-									</td>
-									
-									<td>
-										<p><?php echo $bookings_values->time ?></p>
 									</td>
 									
 									<td>
