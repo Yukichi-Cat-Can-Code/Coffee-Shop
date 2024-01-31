@@ -33,7 +33,7 @@
                     ":time" => $time,
                     ":phone_number" => $phone_number,
                     ":message" => $message,
-                    ":status" => "pending",
+                    ":status" => "Pending",
                 ]);
     
                 header("location: http://localhost/coffee-Shop");

@@ -41,6 +41,7 @@
 								<th>Phone Number</th>
 								<th>Location</th>
 								<th>Status</th>
+								<th>Review</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -77,6 +78,11 @@
 									<td >
 										<p><?php echo $orders_values->status ?></p>
 									</td>
+									<?php if($orders_values->status == "Delivered"): ?>
+										<td >
+											<a href="<?php echo APPURl; ?>/reviews/write-reviews.php" class="btn btn-primary">Write Review</a>
+										</td>
+									<?php endif; ?>
 								</tr><!-- END TR-->
 							<?php endforeach; ?>
 						<?php endif; ?>
