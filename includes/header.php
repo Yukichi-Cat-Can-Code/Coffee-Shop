@@ -54,7 +54,7 @@
             <?php if(isset($_SESSION['user_name'])): ?>
 
                 <li class="nav-item cart dropdown">
-                  <a href="<?php echo APPURl ?>/products/cart.php" class="nav-link dropdown-toggle" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
+                  <a href="<?php echo APPURl ?>/products/cart.php" class="nav-link" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
                     <span class="icon icon-shopping_cart"></span>
                   </a>
                 </li>
