@@ -17,10 +17,10 @@
 		if (empty($reviews)) {
 			echo "<script> alert('one or more field are empty !!');</script>";
 		} else {
-			$place_order_query = $conn->prepare("INSERT INTO reviews(review,user_name)
+			$reviews_query = $conn->prepare("INSERT INTO reviews(review,user_name)
 				VALUES(:review,:user_name)");
 
-			$place_order_query->execute([
+			$reviews_query->execute([
 				":review" => $reviews,
 				":user_name" => $user_name,
 			]);
