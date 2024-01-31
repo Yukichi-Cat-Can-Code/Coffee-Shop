@@ -12,7 +12,7 @@
     <title>Admin Panel</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="http://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
-     <link href="styles/style.css" rel="stylesheet">
+     <link href="<?php echo ADMINAPPURL ?>/styles/style.css" rel="stylesheet">
     <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 </head>
@@ -65,7 +65,7 @@
             </li>
           <?php else: ?>      
             <li class="nav-item">
-              <a class="nav-link" href="<?php echo ADMINAPPURL; ?>/admins/login-admins.html">login
+              <a class="nav-link" href="<?php echo ADMINAPPURL; ?>/admins/login-admins.php">login
               </a>
             </li>
           <?php endif; ?>
