@@ -35,16 +35,16 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="<?php echo ADMINAPPURL; ?>/admins/admins.html" style="margin-left: 20px;">Admins</a>
+            <a class="nav-link" href="<?php echo ADMINAPPURL; ?>/admins/admins.php" style="margin-left: 20px;">Admins</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="<?php echo ADMINAPPURL; ?>/orders-admins/show-orders.html" style="margin-left: 20px;">Orders</a>
+            <a class="nav-link" href="<?php echo ADMINAPPURL; ?>/orders-admins/show-orders.php" style="margin-left: 20px;">Orders</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="<?php echo ADMINAPPURL; ?>/products-admins/show-products.html" style="margin-left: 20px;">Products</a>
+            <a class="nav-link" href="<?php echo ADMINAPPURL; ?>/products-admins/show-products.php" style="margin-left: 20px;">Products</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="<?php echo ADMINAPPURL; ?>/bookings-admins/show-bookings.html" style="margin-left: 20px;">Bookings</a>
+            <a class="nav-link" href="<?php echo ADMINAPPURL; ?>/bookings-admins/show-bookings.php" style="margin-left: 20px;">Bookings</a>
           </li>
         </ul>
         <?php endif; ?>
