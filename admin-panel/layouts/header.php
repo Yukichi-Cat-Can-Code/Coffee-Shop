@@ -61,7 +61,7 @@
                 <?php echo $_SESSION['admin_name']; ?>
               </a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" href="#">Logout</a>
+                <a class="dropdown-item" href="<?php echo ADMINAPPURL ?>/admins/logout.php">Logout</a>
             </li>
           <?php else: ?>      
             <li class="nav-item">
