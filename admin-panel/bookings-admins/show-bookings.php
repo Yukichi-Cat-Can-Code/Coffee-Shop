@@ -49,8 +49,8 @@
                     <td><?php echo $bookings->phone_number; ?></td>
                     <td><?php echo $bookings->message; ?></td>
                     <td><?php echo $bookings->status; ?></td>
-                    <td><a href="update-bookings.php" class="btn btn-success  text-center ">Update</a></td>
-                    <td><a href="delete-bookings.php" class="btn btn-danger  text-center ">delete</a></td>
+                    <td><a href="update-bookings.php?booking_id=<?php echo $bookings->ID ?>" class="btn btn-success  text-center ">Update</a></td>
+                    <td><a href="delete-bookings.php?booking_id=<?php echo $bookings->ID ?>" class="btn btn-danger  text-center ">delete</a></td>
                   </tr>
                   <?php endforeach; ?>
                 </tbody>
