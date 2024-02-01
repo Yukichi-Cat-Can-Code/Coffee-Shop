@@ -9,6 +9,8 @@
     $product->execute();
     $all_product = $product->fetchAll(PDO::FETCH_OBJ);
 
+    
+
 ?>
     <div class="container-fluid">
 
@@ -38,7 +40,7 @@
                      <td><img src="http://localhost/coffee-Shop/images/<?php echo $all_product->image ?>" alt="<?php echo $all_product->image ?>" width="50" height="50" srcset=""></td>
                      <td>$<?php echo $all_product->price ?></td>
                      <td><?php echo $all_product->type ?></td>
-                     <td><a href="delete-products.html" class="btn btn-danger  text-center ">delete</a></td>
+                     <td><a href="delete-products.php?product_id=<?php echo $all_product->ID ?>" class="btn btn-danger  text-center ">delete</a></td>
                   </tr>
                 <?php endforeach; ?>
                 </tbody>
