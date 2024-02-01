@@ -10,12 +10,12 @@
 <?php
     if(isset($_GET['product_id'])){
         $product_id = $_GET['product_id'];
-        $select = $conn->query("SELECT * FROM product");
+        $select = $conn->query("SELECT * FROM product WHERE ID = '$product_id'");
         $select->execute();
         $img = $select->fetch(PDO::FETCH_OBJ);
 
         unlink("../../images/".$img->image."");
-        
+
         $delete_query = $conn->query("DELETE FROM product WHERE ID = '$product_id'");
         $delete_query->execute();
 
