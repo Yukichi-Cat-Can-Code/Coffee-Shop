@@ -28,6 +28,7 @@
                     <th scope="col">Phone</th>
                     <th scope="col">Total Price</th>
                     <th scope="col">Status</th>
+                    <th scope="col">Update</th>
                     <th scope="col">Delete</th>
                   </tr>
                 </thead>
@@ -44,13 +45,10 @@
                       <?php echo $orders->payable_total_cost ?>
                       </td>
                       <td>
-                        <select name="status" id="status">
-                          <option value="<?php echo $orders->status ?>"><?php echo $orders->status ?></option>
-                          <option value="Delivered">Delivered</option>
-                        </select>
+                         <?php echo $orders->status ?>
                       </td>
-    
-                      <td><a href="delete-orders.html" class="btn btn-danger  text-center ">delete</a></td>
+                      <td><a type="submit" href="update-orders.php?order_id=<?php echo $orders->ID  ?>" class="btn btn-success  text-center ">Update</a></td>
+                      <td><a href="delete-orders.php?order_id=<?php echo $orders->ID  ?>" class="btn btn-danger  text-center ">delete</a></td>
                     </tr>
                   <?php endforeach; ?>
                 </tbody>
