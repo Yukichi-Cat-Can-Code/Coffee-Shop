@@ -4,7 +4,7 @@
     
     if(!isset($_SESSION['admin_name'])){
         header("location: http://localhost/coffee-Shop/admin-panel/admins/login-admins.php");
-      }
+    }
     $error_message = " ";
 
 
@@ -33,12 +33,12 @@
           <div class="card">
             <div class="card-body">
                 <h5 class="card-title mb-5 d-inline">Update Booking Status</h5>
-                <form action="update-bookings.php?order_id=<?php echo $booking_id ?>" method="POST">
+                <form action="update-bookings.php?booking_id=<?php echo $booking_id ?>" method="POST">
                     <div class= "from-outline mb-4 mt-4">
                         <select name="status" id="status" class="from-select form-control">
                             <option selected>Choose Type</option>
                             <option value="Pending">Pending</option>
-                            <option value="Delivered">Delivered</option>
+                            <option value="Confirm">Confirm</option>
                         </select>
                         <p style="color: red;"><?php echo $error_message ; ?>&nbsp;</p>
                         <button type="submit" name="submit" class= "btn btn-success mb-4 mt-3 text-center">Update</button>
