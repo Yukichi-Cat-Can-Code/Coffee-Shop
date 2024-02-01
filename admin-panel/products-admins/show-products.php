@@ -17,7 +17,7 @@
           <div class="card">
             <div class="card-body">
               <h5 class="card-title mb-4 d-inline">Available Foods</h5>
-              <a  href="create-products.html" class="btn btn-primary mb-4 text-center float-right">Create Products</a>
+              <a  href="create-products.php" class="btn btn-primary mb-4 text-center float-right">Create Products</a>
 
               <table class="table">
                 <thead>
@@ -35,8 +35,8 @@
                   <tr class="text-center">
                      <th scope="row"><?php echo $all_product->ID ?></th>
                      <td><?php echo $all_product->product_title ?></td>
-                     <td><?php echo $all_product->image ?></td>
-                     <td><?php echo $all_product->price ?></td>
+                     <td><img src="http://localhost/coffee-Shop/images/<?php echo $all_product->image ?>" alt="<?php echo $all_product->image ?>" width="50" height="50" srcset=""></td>
+                     <td>$<?php echo $all_product->price ?></td>
                      <td><?php echo $all_product->type ?></td>
                      <td><a href="delete-products.html" class="btn btn-danger  text-center ">delete</a></td>
                   </tr>
