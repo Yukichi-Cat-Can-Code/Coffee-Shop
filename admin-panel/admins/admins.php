@@ -2,6 +2,9 @@
   require "../layouts/header.php" ;
   require "../../config/config.php" ;
 
+  if(!isset($_SESSION['admin_name'])){
+    header("location: http://localhost/coffee-Shop/admin-panel/admins/login-admins.php");
+  }
 ?>
 
 <?php
@@ -20,7 +23,7 @@
               <table class="table">
                 <thead>
                   
-                  <tr>
+                  <tr class="text-center">
                     <th scope="col">#</th>
                     <th scope="col">username</th>
                     <th scope="col">email</th>
@@ -28,7 +31,7 @@
                 </thead>
                 <tbody>
                 <?php foreach($all_admins as $all_admins): ?>
-                  <tr>
+                  <tr class="text-center">
                     <th scope="row"><?php echo $all_admins->ID; ?></th>
                     <td><?php echo $all_admins->admin_name; ?></td>
                     <td><?php echo $all_admins->admin_email; ?></td>
