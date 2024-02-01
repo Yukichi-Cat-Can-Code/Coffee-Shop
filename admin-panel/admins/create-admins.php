@@ -6,13 +6,15 @@
 <?php 
   if(isset($_POST['submit'])){
 
-    $admin_email = $_POST['admin_email'];
-    $admin_name = $_POST['admin_name'];
-    $admin_password = password_hash($_POST['admin_password'], PASSWORD_DEFAULT);
 
-    if(empty($admin_email) || empty($admin_name) || empty($admin_password)){
+
+    if(empty($_POST['admin_email']) OR empty($_POST['admin_name']) OR empty($_POST['admin_password'])){
       echo "<script>alert('one or more field are empty');</script>";
     }else{
+      $admin_email = $_POST['admin_email'];
+      $admin_name = $_POST['admin_name'];
+      $admin_password = password_hash($_POST['admin_password'], PASSWORD_DEFAULT);
+      
       $admin = $conn->prepare("INSERT INTO admins(admin_name,admin_email,admin_password) VALUES(:admin_name, :admin_email, :admin_password)");
       $admin->execute([
         ":admin_name"=> $admin_name,
