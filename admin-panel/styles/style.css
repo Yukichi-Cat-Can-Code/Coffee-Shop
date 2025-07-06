@@ -1,9 +1,522 @@
- body{background:#f9f9f9;}
-#wrapper{padding:90px 15px;}
-.navbar-expand-lg .navbar-nav.side-nav{flex-direction: column;}
-.card{margin-bottom: 15px; border-radius:0; box-shadow: 0 3px 5px rgba(0,0,0,.1); }
-.header-top{box-shadow: 0 3px 5px rgba(0,0,0,.1)}
-@media(min-width:992px) {
-#wrapper{margin-left: 200px;padding: 90px 15px 15px;}
-.navbar-nav.side-nav{background: #585f66;box-shadow: 2px 1px 2px rgba(0,0,0,.1);position:fixed;top:56px;flex-direction: column!important;left:0;width:200px;overflow-y:auto;bottom:0;overflow-x:hidden;padding-bottom:40px}
+:root {
+  --espresso: #25120f;
+  --dark-roast: #3a2113;
+  --mocha: #583e25;
+  --caramel: #b18350;
+  --gold-accent: #c9a66b;
+  --cream: #f3eee5;
+  --milk: #fcfaf7;
+  --deep-gold: #9d7553;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Montserrat", sans-serif;
+  background-color: var(--milk);
+  color: var(--espresso);
+  padding-top: 90px;
+  overflow-x: hidden;
+}
+
+/* Elegant woodgrain texture for background */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("https://images.unsplash.com/photo-1585314062340-f1a5a7c9328d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxfDB8MXxyYW5kb218MHx8d29vZHx8fHx8fDE2MjMzNjg4MjA&ixlib=rb-1.2.1&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=1920");
+  background-size: cover;
+  opacity: 0.03;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Wrapper Layout */
+#wrapper {
+  padding: 20px 15px;
+  transition: all 0.3s ease;
+}
+
+/* Premium Header Styles */
+.navbar.header-top {
+  background: var(--espresso) !important;
+  padding: 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Gold accent bar */
+.navbar.header-top::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: linear-gradient(
+    90deg,
+    var(--deep-gold),
+    var(--gold-accent),
+    var(--caramel),
+    var(--gold-accent),
+    var(--deep-gold)
+  );
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.navbar-brand {
+  padding: 0;
+  margin: 15px 0;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+/* Logo styling */
+.premium-logo {
+  position: relative;
+  margin-right: 15px;
+}
+
+.logo-circle {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    var(--gold-accent) 0%,
+    var(--caramel) 100%
+  );
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15),
+    inset 0 2px 4px rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.navbar-brand:hover .logo-circle {
+  transform: scale(1.05);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.2),
+    inset 0 2px 4px rgba(255, 255, 255, 0.2);
+}
+
+/* Coffee Bean Logo Design */
+.bean-shape {
+  position: absolute;
+  background: var(--espresso);
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  width: 22px;
+  height: 28px;
+  transform: rotate(45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.bean-shape::after {
+  content: "";
+  position: absolute;
+  width: 2px;
+  height: 18px;
+  background: var(--caramel);
+  opacity: 0.5;
+  border-radius: 1px;
+}
+
+.bean-highlight {
+  position: absolute;
+  width: 8px;
+  height: 6px;
+  top: 6px;
+  left: 7px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  transform: rotate(-45deg);
+}
+
+.brand-titles {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-name {
+  font-family: "Playfair Display", serif;
+  color: var(--gold-accent);
+  font-size: 1.4rem;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.brand-tagline {
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--caramel);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-top: 2px;
+}
+
+/* Navigation styling */
+.navbar-toggler {
+  border-color: rgba(201, 166, 107, 0.5);
+  background-color: rgba(201, 166, 107, 0.1);
+  margin-right: 0;
+  padding: 0.4rem 0.75rem;
+}
+
+.navbar-toggler:focus,
+.navbar-toggler:hover {
+  outline: none;
+  box-shadow: none;
+  background-color: rgba(201, 166, 107, 0.2);
+}
+
+/* Side navigation styling */
+.side-nav {
+  padding-top: 10px;
+}
+
+.side-nav .nav-item {
+  margin: 2px 0;
+  position: relative;
+}
+
+.side-nav .nav-link {
+  color: var(--cream);
+  padding: 8px 20px;
+  margin-left: 20px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  transition: all 0.3s;
+  position: relative;
+  opacity: 0.8;
+}
+
+.side-nav .nav-link:hover {
+  color: var(--gold-accent);
+  opacity: 1;
+}
+
+.side-nav .nav-link.active {
+  color: var(--gold-accent);
+  opacity: 1;
+}
+
+/* Underline effect for nav links */
+.side-nav .nav-link::after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: 5px;
+  left: 0;
+  background: var(--gold-accent);
+  transition: width 0.3s;
+}
+
+.side-nav .nav-link:hover::after,
+.side-nav .nav-link.active::after {
+  width: 30px;
+}
+
+/* Right side menu styling - Updated for Bootstrap 5 */
+.navbar-nav.ms-auto {
+  margin-left: auto;
+}
+
+.ms-auto .nav-item {
+  margin: 0 3px;
+}
+
+.ms-auto .nav-link {
+  color: var(--caramel);
+  transition: all 0.3s;
+  font-weight: 500;
+  padding: 8px 15px;
+}
+
+.ms-auto .nav-link:hover {
+  color: var(--gold-accent);
+}
+
+/* Store link styling */
+#store-link .nav-link {
+  border: 1px solid var(--caramel);
+  border-radius: 4px;
+  padding: 7px 15px;
+}
+
+#store-link .nav-link:hover {
+  background: rgba(201, 166, 107, 0.1);
+  color: var(--gold-accent);
+  border-color: var(--gold-accent);
+}
+
+/* Dropdown styling */
+.dropdown .dropdown-toggle {
+  background: linear-gradient(135deg, var(--mocha), var(--dark-roast));
+  border-radius: 4px;
+}
+
+.dropdown-toggle::after {
+  vertical-align: middle;
+  margin-left: 5px;
+}
+
+.dropdown-menu {
+  min-width: 200px;
+  padding: 10px 0;
+  margin-top: 10px;
+  border: none;
+  border-radius: 4px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+  background: var(--milk);
+  animation: fadeDown 0.3s ease forwards;
+}
+
+@keyframes fadeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-item {
+  padding: 8px 15px;
+  color: var(--mocha);
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.dropdown-item:hover {
+  background-color: var(--cream);
+  color: var(--espresso);
+}
+
+/* Login button styling */
+.login-link .nav-link {
+  background: linear-gradient(135deg, var(--gold-accent), var(--caramel));
+  color: var(--espresso);
+  border-radius: 4px;
+  padding: 7px 15px;
+  font-weight: 600;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.login-link .nav-link:hover {
+  background: linear-gradient(135deg, var(--caramel), var(--gold-accent));
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* User avatar styling for dropdown */
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--gold-accent);
+  color: var(--espresso);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-right: 10px;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-weight: 600;
+  color: var(--espresso);
+  font-size: 0.95rem;
+}
+
+.user-role {
+  font-size: 0.8rem;
+  color: var(--mocha);
+}
+
+.dropdown-header {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  border-bottom: 1px solid var(--cream);
+}
+
+.dropdown-divider {
+  border-top: 1px solid var(--cream);
+  margin: 0;
+}
+
+.logout-item {
+  color: #dc3545 !important;
+  font-weight: 500;
+}
+
+.logout-item:hover {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #dc3545 !important;
+}
+
+#logout-icon {
+  color: #dc3545;
+}
+
+/* Bootstrap 5 specific adjustments */
+.premium-dropdown {
+  --bs-dropdown-min-width: 240px;
+  --bs-dropdown-padding-x: 0;
+  --bs-dropdown-padding-y: 0;
+  --bs-dropdown-border-width: 0;
+  --bs-dropdown-inner-border-radius: 0.5rem;
+}
+
+/* Responsive styles */
+@media (min-width: 992px) {
+  body {
+    padding-top: 75px;
+  }
+
+  #wrapper {
+    margin-left: 250px;
+    padding: 25px 30px;
+  }
+
+  .navbar-nav.side-nav {
+    background: linear-gradient(to bottom, var(--dark-roast), var(--espresso));
+    position: fixed;
+    top: 75px;
+    left: 0;
+    width: 250px;
+    height: calc(100% - 75px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-top: 20px;
+    z-index: 1000;
+  }
+}
+
+@media (max-width: 991px) {
+  .navbar-collapse {
+    background-color: var(--espresso);
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  .side-nav {
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 15px;
+  }
+
+  .ms-auto {
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .ms-auto .nav-item {
+    width: auto;
+    margin: 5px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .navbar.header-top {
+    padding: 10px 0;
+  }
+
+  .brand-name {
+    font-size: 1.2rem;
+  }
+
+  .brand-tagline {
+    font-size: 0.6rem;
+    letter-spacing: 1px;
+  }
+
+  .logo-circle {
+    width: 36px;
+    height: 36px;
+  }
+
+  .bean-shape {
+    width: 20px;
+    height: 24px;
+  }
+
+  .side-nav .nav-link {
+    padding: 8px 15px;
+    margin-left: 10px;
+  }
+
+  .ms-auto {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .ms-auto .nav-item {
+    width: 100%;
+    margin: 5px 0;
+  }
+
+  .ms-auto .nav-link {
+    text-align: center;
+    display: block;
+    width: 100%;
+  }
+}
+
+/* Additional Bootstrap 5 Utility Classes */
+.text-end {
+  text-align: right !important;
+}
+
+.text-start {
+  text-align: left !important;
+}
+
+.me-1 {
+  margin-right: 0.25rem !important;
+}
+
+.me-2 {
+  margin-right: 0.5rem !important;
+}
+
+.me-3 {
+  margin-right: 1rem !important;
+}
+
+.ms-1 {
+  margin-left: 0.25rem !important;
+}
+
+.ms-2 {
+  margin-left: 0.5rem !important;
+}
+
+.ms-3 {
+  margin-left: 1rem !important;
 }

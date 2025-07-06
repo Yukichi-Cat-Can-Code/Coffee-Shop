@@ -1,394 +1,288 @@
-
- <?php
-	require "includes/header.php";
-	require "config/config.php";
-?>
 <?php
-	$product = $conn->query("SELECT ID, product_title, image, SUBSTRING_INDEX(description, ' ', 10) AS description, price, type FROM product LIMIT 4");
+
+ob_start();
+
+require_once "config/config.php";
+require "includes/header.php";
+
+
+
+// Lấy sản phẩm nổi bật từ database
+try {
+	$product = $conn->prepare("SELECT ID, product_title, image, SUBSTRING(description, 1, 100) AS description, price, type FROM product WHERE status = 'Publish' ORDER BY created_at DESC LIMIT 4");
 	$product->execute();
 	$all_product = $product->fetchAll(PDO::FETCH_OBJ);
 
-	$reviews = $conn->query("SELECT * FROM reviews LIMIT 4");
+	// Lấy đánh giá từ khách hàng
+	$reviews = $conn->prepare("SELECT * FROM reviews WHERE status = 'Approved' ORDER BY created_at DESC LIMIT 4");
 	$reviews->execute();
 	$all_reviews = $reviews->fetchAll(PDO::FETCH_OBJ);
-
+} catch (PDOException $e) {
+	// Xử lý lỗi database một cách an toàn
+	error_log("Database Error: " . $e->getMessage());
+	$all_product = [];
+	$all_reviews = [];
+}
 ?>
 
-    <section class="home-slider owl-carousel">
-      <div class="slider-item" style="background-image: url(images/bg_1.jpg);">
-      	<div class="overlay"></div>
-        <div class="container">
-          <div class="row slider-text justify-content-center align-items-center" data-scrollax-parent="true">
-
-            <div class="col-md-8 col-sm-12 text-center ftco-animate">
-            	<span class="subheading">Welcome</span>
-              <h1 class="mb-4">The Best Coffee Testing Experience</h1>
-              <p class="mb-4 mb-md-5">A small river named Duden flows by their place and supplies it with the necessary regelialia.</p>
-              <p><a href="#" class="btn btn-primary p-3 px-xl-4 py-xl-3">Order Now</a> <a href="#" class="btn btn-white btn-outline-white p-3 px-xl-4 py-xl-3">View Menu</a></p>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      <div class="slider-item" style="background-image: url(images/bg_2.jpg);">
-      	<div class="overlay"></div>
-        <div class="container">
-          <div class="row slider-text justify-content-center align-items-center" data-scrollax-parent="true">
-
-            <div class="col-md-8 col-sm-12 text-center ftco-animate">
-            	<span class="subheading">Welcome</span>
-              <h1 class="mb-4">Amazing Taste &amp; Beautiful Place</h1>
-              <p class="mb-4 mb-md-5">A small river named Duden flows by their place and supplies it with the necessary regelialia.</p>
-              <p><a href="#" class="btn btn-primary p-3 px-xl-4 py-xl-3">Order Now</a> <a href="#" class="btn btn-white btn-outline-white p-3 px-xl-4 py-xl-3">View Menu</a></p>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      <div class="slider-item" style="background-image: url(images/bg_3.jpg);">
-      	<div class="overlay"></div>
-        <div class="container">
-          <div class="row slider-text justify-content-center align-items-center" data-scrollax-parent="true">
-
-            <div class="col-md-8 col-sm-12 text-center ftco-animate">
-            	<span class="subheading">Welcome</span>
-              <h1 class="mb-4">Creamy Hot and Ready to Serve</h1>
-              <p class="mb-4 mb-md-5">A small river named Duden flows by their place and supplies it with the necessary regelialia.</p>
-              <p><a href="#" class="btn btn-primary p-3 px-xl-4 py-xl-3">Order Now</a> <a href="#" class="btn btn-white btn-outline-white p-3 px-xl-4 py-xl-3">View Menu</a></p>
-            </div>
-
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="ftco-intro">
-    	<div class="container-wrap">
-    		<div class="wrap d-md-flex align-items-xl-end">
-	    		<div class="info">
-	    			<div class="row no-gutters">
-	    				<div class="col-md-4 d-flex ftco-animate">
-	    					<div class="icon"><span class="icon-phone"></span></div>
-	    					<div class="text">
-	    						<h3>000 (123) 456 7890</h3>
-	    						<p>A small river named Duden flows by their place and supplies.</p>
-	    					</div>
-	    				</div>
-	    				<div class="col-md-4 d-flex ftco-animate">
-	    					<div class="icon"><span class="icon-my_location"></span></div>
-	    					<div class="text">
-	    						<h3>198 West 21th Street</h3>
-	    						<p>	203 Fake St. Mountain View, San Francisco, California, USA</p>
-	    					</div>
-	    				</div>
-	    				<div class="col-md-4 d-flex ftco-animate">
-	    					<div class="icon"><span class="icon-clock-o"></span></div>
-	    					<div class="text">
-	    						<h3>Open Monday-Friday</h3>
-	    						<p>8:00am - 9:00pm</p>
-	    					</div>
-	    				</div>
-	    			</div>
-	    		</div>
-	    		<div class="book p-4">
-	    			<h3>Book a Table</h3>
-	    			<form action="booking/book.php" method="POST" class="appointment-form">
-	    				<div class="d-md-flex">
-		    				<div class="form-group">
-		    					<input type="text" class="form-control" name="first_name" placeholder="First Name">
-		    				</div>
-		    				<div class="form-group ml-md-4">
-		    					<input type="text" class="form-control" name="last_name" placeholder="Last Name">
-		    				</div>
-	    				</div>
-	    				<div class="d-md-flex">
-		    				<div class="form-group">
-		    					<div class="input-wrap">
-		            		<div class="icon"><span class="ion-md-calendar"></span></div>
-		            		<input type="text" name="date" class="form-control appointment_date" placeholder="Date">
-	            		</div>
-		    				</div>
-		    				<div class="form-group ml-md-4">
-		    					<div class="input-wrap">
-		            		<div class="icon"><span class="ion-ios-clock"></span></div>
-		            		<input type="text" name="time" class="form-control appointment_time" placeholder="Time">
-	            		</div>
-		    				</div>
-		    				<div class="form-group ml-md-4">
-		    					<input type="text" name="phone_number" class="form-control" placeholder="Phone">
-		    				</div>
-	    				</div>
-	    				<div class="d-md-flex">
-	    					<div class="form-group">
-		              <textarea name="message" id="" cols="30" rows="2" class="form-control" placeholder="Message"></textarea>
-		            </div>
-		            <div class="form-group ml-md-4">
-		              <button type="submit" name="submit" class="btn btn-white py-3 px-4">Book a Table </button>
-		            </div>
-	    				</div>
-	    			</form>
-	    		</div>
-    		</div>
-    	</div>
-    </section>
-
-    <section class="ftco-about d-md-flex">
-    	<div class="one-half img" style="background-image: url(images/about.jpg);"></div>
-    	<div class="one-half ftco-animate">
-    		<div class="overlap">
-	        <div class="heading-section ftco-animate ">
-	        	<span class="subheading">Discover</span>
-	          <h2 class="mb-4">Our Story</h2>
-	        </div>
-	        <div>
-	  				<p>On her way she met a copy. The copy warned the Little Blind Text, that where it came from it would have been rewritten a thousand times and everything that was left from its origin would be the word "and" and the Little Blind Text should turn around and return to its own, safe country. But nothing the copy said could convince her and so it didn’t take long until a few insidious Copy Writers ambushed her, made her drunk with Longe and Parole and dragged her into their agency, where they abused her for their.</p>
-	  			</div>
-  			</div>
-    	</div>
-    </section>
-
-    <section class="ftco-section ftco-services">
-    	<div class="container">
-    		<div class="row">
-          <div class="col-md-4 ftco-animate">
-            <div class="media d-block text-center block-6 services">
-              <div class="icon d-flex justify-content-center align-items-center mb-5">
-              	<span class="flaticon-choices"></span>
-              </div>
-              <div class="media-body">
-                <h3 class="heading">Easy to Order</h3>
-                <p>Even the all-powerful Pointing has no control about the blind texts it is an almost unorthographic.</p>
-              </div>
-            </div>      
-          </div>
-          <div class="col-md-4 ftco-animate">
-            <div class="media d-block text-center block-6 services">
-              <div class="icon d-flex justify-content-center align-items-center mb-5">
-              	<span class="flaticon-delivery-truck"></span>
-              </div>
-              <div class="media-body">
-                <h3 class="heading">Fastest Delivery</h3>
-                <p>Even the all-powerful Pointing has no control about the blind texts it is an almost unorthographic.</p>
-              </div>
-            </div>      
-          </div>
-          <div class="col-md-4 ftco-animate">
-            <div class="media d-block text-center block-6 services">
-              <div class="icon d-flex justify-content-center align-items-center mb-5">
-              	<span class="flaticon-coffee-bean"></span></div>
-              <div class="media-body">
-                <h3 class="heading">Quality Coffee</h3>
-                <p>Even the all-powerful Pointing has no control about the blind texts it is an almost unorthographic.</p>
-              </div>
-            </div>    
-          </div>
-        </div>
-    	</div>
-    </section>
-
-    <section class="ftco-section">
-    	<div class="container">
-    		<div class="row align-items-center">
-    			<div class="col-md-6 pr-md-5">
-    				<div class="heading-section text-md-right ftco-animate">
-	          	<span class="subheading">Discover</span>
-	            <h2 class="mb-4">Our Menu</h2>
-	            <p class="mb-4">Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove right at the coast of the Semantics, a large language ocean.</p>
-	            <p><a href="menu.php" class="btn btn-primary btn-outline-primary px-4 py-3">View Full Menu</a></p>
-	          </div>
-    			</div>
-    			<div class="col-md-6">
-    				<div class="row">
-    					<div class="col-md-6">
-    						<div class="menu-entry">
-		    					<a href="#" class="img" style="background-image: url(images/menu-1.jpg);"></a>
-		    				</div>
-    					</div>
-    					<div class="col-md-6">
-    						<div class="menu-entry mt-lg-4">
-		    					<a href="#" class="img" style="background-image: url(images/menu-2.jpg);"></a>
-		    				</div>
-    					</div>
-    					<div class="col-md-6">
-    						<div class="menu-entry">
-		    					<a href="#" class="img" style="background-image: url(images/menu-3.jpg);"></a>
-		    				</div>
-    					</div>
-    					<div class="col-md-6">
-    						<div class="menu-entry mt-lg-4">
-		    					<a href="#" class="img" style="background-image: url(images/menu-4.jpg);"></a>
-		    				</div>
-    					</div>
-    				</div>
-    			</div>
-    		</div>
-    	</div>
-    </section>
-
-    <section class="ftco-counter ftco-bg-dark img" id="section-counter" style="background-image: url(images/bg_2.jpg);" data-stellar-background-ratio="0.5">
-			<div class="overlay"></div>
-      <div class="container">
-        <div class="row justify-content-center">
-        	<div class="col-md-10">
-        		<div class="row">
-		          <div class="col-md-6 col-lg-3 d-flex justify-content-center counter-wrap ftco-animate">
-		            <div class="block-18 text-center">
-		              <div class="text">
-		              	<div class="icon"><span class="flaticon-coffee-cup"></span></div>
-		              	<strong class="number" data-number="100">0</strong>
-		              	<span>Coffee Branches</span>
-		              </div>
-		            </div>
-		          </div>
-		          <div class="col-md-6 col-lg-3 d-flex justify-content-center counter-wrap ftco-animate">
-		            <div class="block-18 text-center">
-		              <div class="text">
-		              	<div class="icon"><span class="flaticon-coffee-cup"></span></div>
-		              	<strong class="number" data-number="85">0</strong>
-		              	<span>Number of Awards</span>
-		              </div>
-		            </div>
-		          </div>
-		          <div class="col-md-6 col-lg-3 d-flex justify-content-center counter-wrap ftco-animate">
-		            <div class="block-18 text-center">
-		              <div class="text">
-		              	<div class="icon"><span class="flaticon-coffee-cup"></span></div>
-		              	<strong class="number" data-number="10567">0</strong>
-		              	<span>Happy Customer</span>
-		              </div>
-		            </div>
-		          </div>
-		          <div class="col-md-6 col-lg-3 d-flex justify-content-center counter-wrap ftco-animate">
-		            <div class="block-18 text-center">
-		              <div class="text">
-		              	<div class="icon"><span class="flaticon-coffee-cup"></span></div>
-		              	<strong class="number" data-number="900">0</strong>
-		              	<span>Staff</span>
-		              </div>
-		            </div>
-		          </div>
-		        </div>
-		      </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="ftco-section">
-    	<div class="container">
-    		<div class="row justify-content-center mb-5 pb-3">
-				<div class="col-md-7 heading-section ftco-animate text-center">
-					<span class="subheading">Discover</span>
-					<h2 class="mb-4">Best Coffee Sellers</h2>
-					<p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.</p>
+<!-- Slider Section -->
+<section class="home-slider owl-carousel">
+	<div class="slider-item" style="background-image: url(<?php echo APPURL; ?>/images/bg_1.jpg);">
+		<div class="overlay"></div>
+		<div class="container">
+			<div class="row slider-text justify-content-center align-items-center" data-scrollax-parent="true">
+				<div class="col-md-8 col-sm-12 text-center ftco-animate">
+					<span class="subheading">Chào Mừng</span>
+					<h1 class="mb-4">Trải Nghiệm Cà Phê Tuyệt Hảo</h1>
+					<p class="mb-4 mb-md-5">Khám phá hương vị đậm đà tinh túy từ những hạt cà phê thượng hạng được chọn lọc kỹ lưỡng.</p>
+					<p>
+						<a href="<?php echo APPURL; ?>/menu.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Đặt Bàn</a>
+						<a href="<?php echo APPURL; ?>/menu.php" class="btn btn-white btn-outline-white p-3 px-xl-4 py-xl-3">Xem Thực Đơn</a>
+					</p>
 				</div>
-        	</div>
-			<div class="row">
-				<?php foreach($all_product as $product): ?>
-					<div class="col-md-3">
-						<div class="menu-entry">
-								<a target="_blank" href="products/product-single.php?id=<?php echo $product->ID ?>" class="img" style="background-image: url('<?php echo APPURl ; ?>/images/<?php echo $product->image; ?>')"></a>
-								<div class="text text-center pt-4">
-									<h3><a href="products/product-single.php?id=<?php echo $product->ID ?>"><?php echo $product->product_title; ?></a></h3>
-									<p><?php echo $product->description; ?></p>
-									<p class="price"><span><?php echo $product->price; ?></span></p>
-									<p><a target="_blank" href="products/product-single.php?id=<?php echo $product->ID; ?>" class="btn btn-primary btn-outline-primary">Show</a></p>
-								</div>
-							</div>
-					</div>
-				<?php endforeach; ?>
 			</div>
-    	</div>
-    </section>
+		</div>
+	</div>
 
-    <section class="ftco-gallery">
-    	<div class="container-wrap">
-    		<div class="row no-gutters">
-					<div class="col-md-3 ftco-animate">
-						<a href="gallery.html" class="gallery img d-flex align-items-center" style="background-image: url(images/gallery-1.jpg);">
-							<div class="icon mb-4 d-flex align-items-center justify-content-center">
-    						<span class="icon-search"></span>
-    					</div>
-						</a>
-					</div>
-					<div class="col-md-3 ftco-animate">
-						<a href="gallery.html" class="gallery img d-flex align-items-center" style="background-image: url(images/gallery-3.jpg);">
-							<div class="icon mb-4 d-flex align-items-center justify-content-center">
-    						<span class="icon-search"></span>
-    					</div>
-						</a>
-					</div>
-					<div class="col-md-3 ftco-animate">
-						<a href="gallery.html" class="gallery img d-flex align-items-center" style="background-image: url(images/gallery-3.jpg);">
-							<div class="icon mb-4 d-flex align-items-center justify-content-center">
-    						<span class="icon-search"></span>
-    					</div>
-						</a>
-					</div>
-					<div class="col-md-3 ftco-animate">
-						<a href="gallery.html" class="gallery img d-flex align-items-center" style="background-image: url(images/gallery-4.jpg);">
-							<div class="icon mb-4 d-flex align-items-center justify-content-center">
-    						<span class="icon-search"></span>
-    					</div>
-						</a>
-					</div>
-        </div>
-    	</div>
-    </section>
+	<div class="slider-item" style="background-image: url(<?php echo APPURL; ?>/images/bg_2.jpg);">
+		<div class="overlay"></div>
+		<div class="container">
+			<div class="row slider-text justify-content-center align-items-center" data-scrollax-parent="true">
+				<div class="col-md-8 col-sm-12 text-center ftco-animate">
+					<span class="subheading">Chào Mừng</span>
+					<h1 class="mb-4">Hương Vị Tuyệt Hảo &amp; Không Gian Tinh Tế</h1>
+					<p class="mb-4 mb-md-5">Tận hưởng những khoảnh khắc thư giãn trong không gian ấm cúng, tinh tế với hương vị cà phê đặc trưng.</p>
+					<p>
+						<a href="<?php echo APPURL; ?>/products/cart.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Đặt Hàng</a>
+						<a href="<?php echo APPURL; ?>/menu.php" class="btn btn-white btn-outline-white p-3 px-xl-4 py-xl-3">Xem Thực Đơn</a>
+					</p>
+				</div>
+			</div>
+		</div>
+	</div>
 
-    
+	<div class="slider-item" style="background-image: url(<?php echo APPURL; ?>/images/bg_3.jpg);">
+		<div class="overlay"></div>
+		<div class="container">
+			<div class="row slider-text justify-content-center align-items-center" data-scrollax-parent="true">
+				<div class="col-md-8 col-sm-12 text-center ftco-animate">
+					<span class="subheading">Chào Mừng</span>
+					<h1 class="mb-4">Thơm Ngon, Nóng Hổi & Sẵn Sàng Phục Vụ</h1>
+					<p class="mb-4 mb-md-5">Đội ngũ nhân viên chuyên nghiệp sẵn sàng mang đến cho bạn trải nghiệm cà phê hoàn hảo mỗi ngày.</p>
+					<p>
+						<a href="<?php echo APPURL; ?>/products/cart.php" class="btn btn-primary p-3 px-xl-4 py-xl-3">Đặt Hàng</a>
+						<a href="<?php echo APPURL; ?>/menu.php" class="btn btn-white btn-outline-white p-3 px-xl-4 py-xl-3">Xem Thực Đơn</a>
+					</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
 
-    <section class="ftco-section img" id="ftco-testimony" style="background-image: url(images/bg_1.jpg);"  data-stellar-background-ratio="0.5">
-    	<div class="overlay"></div>
-	    <div class="container">
-	      <div class="row justify-content-center mb-5">
-	        <div class="col-md-7 heading-section text-center ftco-animate">
-	        	<span class="subheading">Testimony</span>
-	          <h2 class="mb-4">Customers Says</h2>
-	          <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.</p>
-	        </div>
-	      </div>
-	    </div>
-	    <div class="container-wrap">
-	      <div class="row d-flex no-gutters">
+<!-- Best Sellers Section -->
+<section class="ftco-section">
+	<div class="container">
+		<div class="row justify-content-center mb-5 pb-3">
+			<div class="col-md-7 heading-section ftco-animate text-center">
+				<span class="subheading">Khám Phá</span>
+				<h2 class="mb-4">Sản Phẩm Bán Chạy</h2>
+				<p>Những món đồ uống và thực phẩm được yêu thích nhất tại Artisan Coffee, được lựa chọn từ những nguyên liệu chất lượng cao.</p>
+			</div>
+		</div>
+		<div class="row">
+			<?php foreach ($all_product as $product): ?>
+				<div class="col-md-3">
+					<div class="menu-entry">
+						<a href="<?php echo APPURL; ?>/products/product-single.php?id=<?php echo $product->ID ?>" class="img" style="background-image: url('<?php echo APPURL; ?>/images/<?php echo escape($product->image); ?>')"></a>
+						<div class="text text-center pt-4">
+							<h3><a href="<?php echo APPURL; ?>/products/product-single.php?id=<?php echo $product->ID ?>"><?php echo escape($product->product_title); ?></a></h3>
+							<p><?php echo escape($product->description); ?>...</p>
+							<p class="price"><span><?php echo formatCurrency($product->price); ?></span></p>
+							<p><a href="<?php echo APPURL; ?>/products/product-single.php?id=<?php echo $product->ID; ?>" class="btn btn-primary btn-outline-primary">Xem Chi Tiết</a></p>
+						</div>
+					</div>
+				</div>
+			<?php endforeach; ?>
+		</div>
+	</div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="ftco-section img" id="ftco-testimony" style="background-image: url(<?php echo APPURL; ?>/images/bg_1.jpg);" data-stellar-background-ratio="0.5">
+	<div class="overlay"></div>
+	<div class="container">
+		<div class="row justify-content-center mb-5">
+			<div class="col-md-7 heading-section text-center ftco-animate">
+				<span class="subheading">Đánh Giá</span>
+				<h2 class="mb-4">Khách Hàng Nói Gì</h2>
+				<p>Những trải nghiệm và cảm nhận chân thực từ khách hàng về sản phẩm và dịch vụ tại Artisan Coffee.</p>
+			</div>
+		</div>
+	</div>
+	<div class="container-wrap">
+		<div class="row d-flex no-gutters">
 			<?php $counter = 0; ?>
-				<?php foreach($all_reviews as $review): ?>
-					<?php if($counter % 2 == 0): ?>
-						<div class="col-lg align-self-sm-end ftco-animate">
+			<?php foreach ($all_reviews as $review): ?>
+				<?php if ($counter % 2 == 0): ?>
+					<div class="col-lg align-self-sm-end ftco-animate">
 						<div class="testimony">
 							<blockquote>
-								<p>&ldquo;<?php echo $review->review; ?>&rdquo;</p>
+								<p>&ldquo;<?php echo escape($review->review); ?>&rdquo;</p>
 							</blockquote>
 							<div class="author d-flex mt-4">
-								<div class="name align-self-center"><?php echo $review->user_name; ?></div>
+								<div class="name align-self-center"><?php echo escape($review->user_name); ?></div>
+							</div>
+							<!-- Hiển thị rating sao -->
+							<div class="rating mt-2">
+								<?php
+								// Lấy rating từ database hoặc mặc định là 5 sao nếu không có
+								$rating = isset($review->rating) ? (int)$review->rating : 5;
+								// Hiển thị số sao đánh giá
+								for ($i = 1; $i <= 5; $i++): ?>
+									<i class="icon-star<?php echo ($i <= $rating) ? '' : '-o'; ?>" style="color: #fac564;"></i>
+								<?php endfor; ?>
+							</div>
+							<div class="date text-muted mt-1">
+								<small><?php echo date('d/m/Y', strtotime($review->created_at)); ?></small>
 							</div>
 						</div>
-						</div>
-					<?php else: ?>
-						<div class="col-lg align-self-sm-end">
+					</div>
+				<?php else: ?>
+					<div class="col-lg align-self-sm-end">
 						<div class="testimony overlay">
 							<blockquote>
-								<p>&ldquo;<?php echo $review->review; ?>&rdquo;</p>
+								<p>&ldquo;<?php echo escape($review->review); ?>&rdquo;</p>
 							</blockquote>
 							<div class="author d-flex mt-4">
-								<div class="name align-self-center"><?php echo $review->user_name; ?></div>
+								<div class="name align-self-center"><?php echo escape($review->user_name); ?></div>
+							</div>
+							<!-- Hiển thị rating sao -->
+							<div class="rating mt-2">
+								<?php
+								// Lấy rating từ database hoặc mặc định là 5 sao nếu không có
+								$rating = isset($review->rating) ? (int)$review->rating : 5;
+								// Hiển thị số sao đánh giá
+								for ($i = 1; $i <= 5; $i++): ?>
+									<i class="icon-star<?php echo ($i <= $rating) ? '' : '-o'; ?>" style="color: #fac564;"></i>
+								<?php endfor; ?>
+							</div>
+							<div class="date text-muted mt-1">
+								<small><?php echo date('d/m/Y', strtotime($review->created_at)); ?></small>
 							</div>
 						</div>
+					</div>
+				<?php endif; ?>
+				<?php $counter++; ?>
+			<?php endforeach; ?>
+		</div>
+	</div>
+</section>
+
+<!-- About Us Section -->
+<section class="ftco-about d-md-flex">
+	<div class="one-half img" style="background-image: url(<?php echo APPURL; ?>/images/about.jpg);"></div>
+	<div class="one-half ftco-animate">
+		<div class="overlap">
+			<div class="heading-section ftco-animate ">
+				<span class="subheading">Khám Phá</span>
+				<h2 class="mb-4">Câu Chuyện Của Chúng Tôi</h2>
+			</div>
+			<div>
+				<p>Từ một quán cà phê nhỏ năm 2010, Artisan Coffee đã trở thành điểm đến yêu thích của những người yêu cà phê trên khắp cả nước. Chúng tôi tự hào mang đến những trải nghiệm cà phê đẳng cấp thế giới nhưng vẫn giữ được bản sắc Việt Nam.</p>
+				<p>Mỗi hạt cà phê được chọn lọc kỹ lưỡng từ những vùng trồng nổi tiếng như Buôn Ma Thuột, Lâm Đồng. Chúng tôi hợp tác trực tiếp với nông dân địa phương để đảm bảo chất lượng tốt nhất và tạo sinh kế bền vững cho cộng đồng.</p>
+				<p><a href="<?php echo APPURL; ?>/about.php" class="btn btn-primary btn-outline-primary px-4 py-3">Tìm Hiểu Thêm</a></p>
+			</div>
+		</div>
+	</div>
+</section>
+
+<!-- Services Section -->
+<section class="ftco-section ftco-services">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-4 ftco-animate">
+				<div class="media d-block text-center block-6 services">
+					<div class="icon d-flex justify-content-center align-items-center mb-5">
+						<span class="flaticon-choices"></span>
+					</div>
+					<div class="media-body">
+						<h3 class="heading">Dễ Dàng Đặt Hàng</h3>
+						<p>Chỉ với vài thao tác đơn giản, bạn có thể đặt món yêu thích và nhận giao hàng tận nơi.</p>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-4 ftco-animate">
+				<div class="media d-block text-center block-6 services">
+					<div class="icon d-flex justify-content-center align-items-center mb-5">
+						<span class="flaticon-delivery-truck"></span>
+					</div>
+					<div class="media-body">
+						<h3 class="heading">Giao Hàng Nhanh Chóng</h3>
+						<p>Đội ngũ giao hàng chuyên nghiệp đảm bảo đồ uống đến tay bạn trong tình trạng nóng hổi, thơm ngon.</p>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-4 ftco-animate">
+				<div class="media d-block text-center block-6 services">
+					<div class="icon d-flex justify-content-center align-items-center mb-5">
+						<span class="flaticon-coffee-bean"></span>
+					</div>
+					<div class="media-body">
+						<h3 class="heading">Cà Phê Chất Lượng Cao</h3>
+						<p>Chúng tôi sử dụng những hạt cà phê ngon nhất, rang xay theo công thức độc quyền để tạo nên hương vị đặc trưng.</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+
+<!-- Counter Section -->
+<section class="ftco-counter ftco-bg-dark img" id="section-counter" style="background-image: url(<?php echo APPURL; ?>/images/bg_2.jpg);" data-stellar-background-ratio="0.5">
+	<div class="overlay"></div>
+	<div class="container">
+		<div class="row justify-content-center">
+			<div class="col-md-10">
+				<div class="row">
+					<div class="col-md-3 col-sm-6 col-xs-6 d-flex justify-content-center counter-wrap ftco-animate">
+						<div class="block-18 text-center">
+							<div class="text">
+								<strong class="number" data-number="15">0</strong>
+								<span>Năm Kinh Nghiệm</span>
+							</div>
 						</div>
-					<?php endif; ?>
-					<?php $counter++; ?>
-				<?php endforeach; ?>
-
-
-	      </div>
-	    </div>
-	  </section>
+					</div>
+					<div class="col-md-3 col-sm-6 col-xs-6 d-flex justify-content-center counter-wrap ftco-animate">
+						<div class="block-18 text-center">
+							<div class="text">
+								<strong class="number" data-number="20000">0</strong>
+								<span>Khách Hàng Hài Lòng</span>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-3 col-sm-6 col-xs-6 d-flex justify-content-center counter-wrap ftco-animate">
+						<div class="block-18 text-center">
+							<div class="text">
+								<strong class="number" data-number="50">0</strong>
+								<span>Cửa Hàng</span>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-3 col-sm-6 col-xs-6 d-flex justify-content-center counter-wrap ftco-animate">
+						<div class="block-18 text-center">
+							<div class="text">
+								<strong class="number" data-number="500">0</strong>
+								<span>Nhân Viên</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
 
 <?php
-	require "includes/footer.php";
+require "includes/footer.php";
+ob_end_flush();
 ?>
-
-		
-	
-

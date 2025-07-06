@@ -1,184 +1,82 @@
 <?php
-
-	require "../includes/header.php";
-	require "../config/config.php";
-	require "../auth/not-access.php";
+require "../config/config.php";
+require "../auth/not-access.php";
+require "../includes/header.php";
 ?>
-<?php
 
-	if(!isset($_SERVER['HTTP_REFERER'])){
-		header("location:".APPURl."");
-		exit;
-	}
-	if (isset($_POST['submit'])) {
-		$firstname = $_POST['firstname'];
-		$lastname = $_POST['lastname'];
-		$streetaddress = $_POST['streetaddress'];
-		$Appartment = $_POST['Appartment'];
-		$towncity = $_POST['towncity'];
-		$postcodezip = $_POST['postcodezip'];
-		$phone = $_POST['phone'];
-		$emailaddress = $_POST['emailaddress'];
-		$payable_total_cost = $_SESSION['payable_total_cost'];
-		$user_id = $_SESSION['user_id'];
+<section class="ftco-section">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-8 offset-md-2 ftco-animate">
+				<h3 class="mb-4 billing-heading">Thông tin đặt hàng</h3>
+				<div id="order-message"></div>
+				<form id="checkout-form" class="billing-form p-3 p-md-4 bg-light rounded" autocomplete="off">
+					<div class="form-group">
+						<label for="firstname">Họ *</label>
+						<input type="text" name="firstname" id="firstname" class="form-control">
+					</div>
+					<div class="form-group">
+						<label for="lastname">Tên *</label>
+						<input type="text" name="lastname" id="lastname" class="form-control">
+					</div>
+					<div class="form-group">
+						<label for="streetaddress">Địa chỉ *</label>
+						<input type="text" name="streetaddress" id="streetaddress" class="form-control">
+					</div>
+					<div class="form-group">
+						<label for="apartment">Căn hộ, tầng, v.v. (không bắt buộc)</label>
+						<input type="text" name="apartment" id="apartment" class="form-control">
+					</div>
+					<div class="form-group">
+						<label for="towncity">Thành phố *</label>
+						<input type="text" name="towncity" id="towncity" class="form-control">
+					</div>
+					<div class="form-group">
+						<label for="postcodezip">Mã bưu điện *</label>
+						<input type="text" name="postcodezip" id="postcodezip" class="form-control">
+					</div>
+					<div class="form-group">
+						<label for="phone">Số điện thoại *</label>
+						<input type="text" name="phone" id="phone" class="form-control">
+					</div>
+					<div class="form-group">
+						<label for="emailaddress">Email *</label>
+						<input type="email" name="emailaddress" id="emailaddress" class="form-control">
+					</div>
+					<button type="submit" class="btn btn-primary px-4 py-2">Đặt hàng</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</section>
 
-		if (empty($firstname) || empty($lastname) || empty($streetaddress) || empty($towncity) || empty($postcodezip) || empty($phone) || empty($emailaddress)) {
-			echo "<script> alert('one or more field are empty !!');</script>";
-		} else {
-			$place_order_query = $conn->prepare("INSERT INTO orders(firstname, lastname, streetaddress, appartment, towncity, postcode, phone, email, payable_total_cost, user_id)
-				VALUES(:firstname, :lastname, :streetaddress, :appartment, :towncity, :postcode, :phone, :email, :payable_total_cost, :user_id)");
+<script>
+	document.getElementById('checkout-form').addEventListener('submit', async function(e) {
+		e.preventDefault();
+		const form = this;
+		const formData = new FormData(form);
+		const msgDiv = document.getElementById('order-message');
+		msgDiv.innerHTML = '';
 
-			$place_order_query->execute([
-				":firstname" => $firstname,
-				":lastname" => $lastname,
-				":streetaddress" => $streetaddress,
-				":appartment" => $Appartment,
-				":towncity" => $towncity,
-				":postcode" => $postcodezip,
-				":phone" => $phone,
-				":email" => $emailaddress,
-				":payable_total_cost" => $payable_total_cost,
-				":user_id" => $user_id,
-			]);
+		try {
+			const response = await fetch('ajax-checkout.php', {
+				method: 'POST',
+				body: formData
+			});
+			const res = await response.json();
+			console.log(res); // Log response ra console
 
-			header("location: pay.php");
+			if (res.success) {
+				msgDiv.innerHTML = '<div class="alert alert-success">Đặt hàng thành công! Đang chuyển hướng...</div>';
+				setTimeout(() => window.location = 'pay.php', 1200);
+			} else {
+				msgDiv.innerHTML = '<div class="alert alert-danger">' + (res.message || 'Có lỗi xảy ra!') + '</div>';
+			}
+		} catch (err) {
+			console.error('Lỗi fetch:', err);
+			msgDiv.innerHTML = '<div class="alert alert-danger">Không thể kết nối máy chủ hoặc lỗi không xác định!</div>';
 		}
-	}
-?>
+	});
+</script>
 
-
-    <section class="home-slider owl-carousel">
-
-      <div class="slider-item" style="background-image: url(<?php echo APPURl ?>/images/bg_3.jpg);" data-stellar-background-ratio="0.5">
-      	<div class="overlay"></div>
-        <div class="container">
-          <div class="row slider-text justify-content-center align-items-center">
-
-            <div class="col-md-7 col-sm-12 text-center ftco-animate">
-            	<h1 class="mb-3 mt-5 bread">Checkout</h1>
-	            <p class="breadcrumbs"><span class="mr-2"><a href="<?php echo APPURl ?>">Home </a></span> <span>Checout</span></p>
-            </div>
-
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="ftco-section">
-      <div class="container">
-        <div class="row">
-          <div class="col-md-12 ftco-animate">
-				<form  action="checkout.php" method="POST" class="billing-form ftco-bg-dark p-3 p-md-5">
-					<h3 class="mb-4 billing-heading">Billing Details</h3>
-					<div class="row align-items-end">
-						<div class="col-md-6">
-						<div class="form-group">
-							<label for="firstname">Firt Name *</label>
-						<input type="text" name="firstname" id="firstname" class="form-control" placeholder="">
-						</div>
-					</div>
-	              	<div class="col-md-6">
-						<div class="form-group">
-							<label for="lastname">Last Name *</label>
-						<input type="text" name="lastname" class="form-control" placeholder="">
-						</div>
-                	</div>
-
-					<div class="w-100"></div>
-						<div class="col-md-12">
-							<div class="form-group">
-							<label for="streetaddress">Street Address *</label>
-						<input type="text" name="streetaddress" class="form-control" placeholder="House number and street name">
-						</div>
-						</div>
-						<div class="col-md-12">
-							<div class="form-group">
-						<input type="text" class="form-control" name="Appartment" placeholder="Appartment, suite, unit etc: (optional)">
-						</div>
-						</div>
-						<div class="w-100"></div>
-						<div class="col-md-6">
-							<div class="form-group">
-							<label for="towncity">Town / City *</label>
-						<input type="text" name="towncity" class="form-control" placeholder="">
-						</div>
-						</div>
-						<div class="col-md-6">
-							<div class="form-group">
-								<label for="postcodezip">Postcode / ZIP *</label>
-						<input type="text" name="postcodezip" class="form-control" placeholder="">
-						</div>
-						</div>
-						<div class="w-100"></div>
-						<div class="col-md-6">
-						<div class="form-group">
-							<label for="phone">Phone *</label>
-						<input type="text" name="phone" class="form-control" placeholder="">
-						</div>
-					</div>
-					<div class="col-md-6">
-						<div class="form-group">
-							<label for="emailaddress">Email Address *</label>
-						<input type="text" name="emailaddress" class="form-control" placeholder="">
-						</div>
-					</div>
-                	<div class="w-100"></div>
-					<div class="col-md-12">
-						<div class="form-group mt-4">
-							<div class="radio">
-								<p><button name="submit" type="submit" class="btn btn-primary py-3 px-4">Place an order</button></p>
-							</div>
-						</div>
-					</div>
-	            </div>
-	          </form><!-- END -->
-
-
-          </div> <!-- .col-md-8 -->
-
-           
-          </div>
-
-        </div>
-      </div>
-    </section> <!-- .section -->
-
-	<?php require "../includes/footer.php"; ?>
-
-  <script>
-		$(document).ready(function(){
-
-		var quantitiy=0;
-		   $('.quantity-right-plus').click(function(e){
-		        
-		        // Stop acting like a button
-		        e.preventDefault();
-		        // Get the field name
-		        var quantity = parseInt($('#quantity').val());
-		        
-		        // If is not undefined
-		            
-		            $('#quantity').val(quantity + 1);
-
-		          
-		            // Increment
-		        
-		    });
-
-		     $('.quantity-left-minus').click(function(e){
-		        // Stop acting like a button
-		        e.preventDefault();
-		        // Get the field name
-		        var quantity = parseInt($('#quantity').val());
-		        
-		        // If is not undefined
-		      
-		            // Increment
-		            if(quantity>0){
-		            $('#quantity').val(quantity - 1);
-		            }
-		    });
-		    
-		});
-	</script>
-
+<?php require "../includes/footer.php"; ?>

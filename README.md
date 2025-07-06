@@ -1,45 +1,67 @@
 # Coffee Shop E-Commerce Website
-Welcome to the Coffee Shop E-Commerce Website repository! This project is a fully dynamic website developed using PHP and MySQL, based on a Bootstrap template from colorlib.com. The goal of this project is to provide a user-friendly and visually appealing online platform for coffee enthusiasts to explore and purchase their favorite coffee products.
-## Features
-- **Dynamic Content:** The website is powered by PHP and MySQL, allowing for dynamic content management. Products, categories, and other essential information are easily updated through the database.
 
-- **Responsive Design:** Built on the Bootstrap framework, the website is responsive and ensures a seamless user experience across various devices and screen sizes.
+Chào mừng bạn đến với dự án Coffee Shop E-Commerce Website!  
+Đây là website bán hàng cà phê động, sử dụng PHP & MySQL, giao diện hiện đại, dễ sử dụng và dễ tùy biến.
 
-- **User Authentication:** Secure user authentication system is implemented to allow users to create accounts, log in, and manage their profiles.
+## Tính năng nổi bật
 
-- **Product Catalog:** The website showcases a variety of coffee products with detailed information, including images, descriptions, and prices.
+- Quản lý sản phẩm, danh mục, đơn hàng động qua database
+- Giao diện responsive, đẹp mắt (Bootstrap)
+- Đăng ký, đăng nhập, quản lý tài khoản người dùng
+- Giỏ hàng, đặt hàng, thanh toán qua PayPal (USD)
+- Quản trị viên quản lý sản phẩm, đơn hàng, người dùng
 
-- **Shopping Cart:** Users can easily add products to their shopping cart, review their selections, and proceed to checkout for a smooth shopping experience.
+## Yêu cầu hệ thống
 
-- **Order Management:** Admins can manage orders, update order statuses, and view order history through an intuitive interface.
+- Xampp (Apache)
+- PHP >= 7.2
+- MySQL/MariaDB
 
-## Prerequisites
-Before getting started, make sure you have the following prerequisites installed:
+## Hướng dẫn cài đặt
 
-- Web server (Apache)
-- PHP
-- MySQL
-- Composer (for managing PHP dependencies)
+1. **Clone source về máy:**
 
-## Installation
-1. Clone the repository to your local machine:
-```
-git clone https://github.com/your-username/coffee-shop-ecommerce.git
-```
-2. Set up the database by importing the SQL file (database.sql) included in the repository.
+   ```
+   git clone https://github.com/your-username/coffee-shop-ecommerce.git
+   ```
 
-3.Configure the database connection in config/config.php:
-```
-    $servername = "localhost";
-    $username = "root";
-    $password = "";
-    $dbname = "coffee-shop";
-```
-4. Install PHP dependencies using Composer:
-```
-composer install
-```
+2. **Tạo database và import dữ liệu:**
 
-5. Start your web server and navigate to the project folder in your browser.
+   - Tạo database mới, ví dụ: `coffee-shop`
+   - Import file `database.sql` có sẵn trong thư mục dự án
 
-6. Enjoy exploring and customizing the Coffee Shop E-Commerce Website
+3. **Cấu hình kết nối database:**  
+   Mở file `config/config.php` và chỉnh lại thông tin:
+
+   ```php
+   $servername = "localhost";
+   $username = "root";
+   $password = "";
+   $dbname = "coffee-shop";
+   ```
+
+4. **Khởi động web server (XAMPP/WAMP...)**  
+   Truy cập trình duyệt với đường dẫn:
+   ```
+   http://localhost/Coffee-Shop/
+   ```
+
+## Đăng nhập thử nghiệm
+
+- **Tài khoản quản trị (Admin):**
+
+  - Đường dẫn: [http://localhost/Coffee-Shop/admin/](http://localhost/Coffee-Shop/admin/)
+  - Username: `admin`
+  - Password: `admin123`
+
+- **Tài khoản khách hàng (Store):**
+  - Đường dẫn: [http://localhost/Coffee-Shop/](http://localhost/Coffee-Shop/)
+  - Username: `abcdef@gmail.com`
+  - Password: `abcdefgh`
+
+> _Bạn có thể tạo thêm tài khoản khách hàng mới trực tiếp trên website._
+
+## Một số đường dẫn chính
+
+- Trang chủ: [http://localhost/Coffee-Shop/](http://localhost/Coffee-Shop/)
+- Trang quản trị: [http://localhost/Coffee-Shop/admin/](http://localhost/Coffee-Shop/admin/)
