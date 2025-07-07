@@ -99,7 +99,7 @@ abstract class BaseTest
     {
         if ($this->driver) {
             $this->driver->quit();
-            $this->logInfo("WebDriver đã được đóng");
+            $this->logInfo("WebDriver closed successfully");
         }
     }
     
@@ -237,7 +237,7 @@ abstract class BaseTest
         if ($this->showUI) {
             $pauseTime = $seconds ?: TestConfig::PAUSE_FOR_OBSERVATION;
             if ($message) {
-                $this->logInfo($message . " (Pause {$pauseTime}s để quan sát)");
+                $this->logInfo($message . " (Pause {$pauseTime}s for observation)");
             }
             sleep($pauseTime);
         }

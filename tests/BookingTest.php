@@ -6,25 +6,25 @@ use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverSelect;
 
 /**
- * Test class cho chức năng đặt bàn
+ * Test class for booking functionality
  */
 class BookingTest extends BaseTest
 {
-    // Thông tin user test
+    // Test user information
     private $userEmail = 'abcdef@gmail.com';
     private $userPassword = 'abcdefgh';
     
-    // Thông tin đặt bàn test
+    // Test booking data
     private $testBookingData = [
-        'first_name' => 'Nguyễn',
-        'last_name' => 'Văn Test',
+        'first_name' => 'Nguyen',
+        'last_name' => 'Van Test',
         'phone_number' => '0987654321',
-        'message' => 'Đây là test booking từ Selenium'
+        'message' => 'This is a test booking from Selenium'
     ];
     
     public function runAllTests()
     {
-        $this->logInfo("🧪 BẮT ĐẦU TEST BOOKING SYSTEM");
+        $this->logInfo("🧪 STARTING BOOKING SYSTEM TESTS");
         echo "=" . str_repeat("=", 60) . "\n";
         
         $this->setUp();
@@ -35,7 +35,7 @@ class BookingTest extends BaseTest
             $this->testBookingFormValidation();
             $this->testDateTimeSelection();
             
-            $this->logSuccess("TẤT CẢ BOOKING TESTS ĐÃ PASS!");
+            $this->logSuccess("ALL BOOKING TESTS PASSED!");
         } catch (Exception $e) {
             $this->logError("Test FAILED: " . $e->getMessage());
             $this->takeScreenshot('booking_failed');
@@ -46,33 +46,33 @@ class BookingTest extends BaseTest
     }
     
     /**
-     * Test yêu cầu đăng nhập trước khi đặt bàn
+     * Test login requirement before booking
      */
     public function testUserLoginRequired()
     {
-        $this->logStep(1, "Kiểm tra yêu cầu đăng nhập");
+        $this->logStep(1, "Testing login requirement");
         
-        // Truy cập trực tiếp trang đặt bàn mà chưa đăng nhập
-        $this->logAction("Truy cập trang đặt bàn mà chưa đăng nhập");
+        // Access booking page without login
+        $this->logAction("Accessing booking page without login");
         $this->driver->get($this->baseUrl . '/booking/book.php');
         
-        // Chờ và kiểm tra có chuyển hướng đến login không
-        $this->pauseForObservation(3, "Kiểm tra response của hệ thống");
+        // Wait and check if redirected to login
+        $this->pauseForObservation(3, "Checking system response");
         $currentUrl = $this->driver->getCurrentURL();
         
         if (strpos($currentUrl, 'login') !== false) {
-            $this->logSuccess("Hệ thống yêu cầu đăng nhập đúng!");
+            $this->logSuccess("System correctly requires login!");
         } else {
-            // Kiểm tra xem có thông báo yêu cầu đăng nhập không
+            // Check if there's a login required message
             try {
                 $this->assertElementExists(WebDriverBy::className('alert'));
-                $this->logSuccess("Hiển thị thông báo yêu cầu đăng nhập!");
+                $this->logSuccess("Login required alert displayed!");
             } catch (Exception $e) {
-                $this->logWarning("Cảnh báo: Hệ thống có thể không yêu cầu đăng nhập");
+                $this->logWarning("Warning: System may not require login");
             }
         }
         
-        $this->pauseForObservation(2, "Hoàn thành test yêu cầu đăng nhập");
+        $this->pauseForObservation(2, "Login requirement test completed");
     }
     
     /**
@@ -80,183 +80,190 @@ class BookingTest extends BaseTest
      */
     private function loginUser()
     {
-        $this->logAction("Đăng nhập user để test booking");
+        $this->logAction("Logging in user for booking test");
         
-        // Điều hướng đến trang đăng nhập user
+        // Navigate to user login page
         $this->driver->get($this->baseUrl . '/auth/login.php');
-        $this->pauseForObservation(2, "Trang login user đã load");
+        $this->pauseForObservation(2, "User login page loaded");
         
         try {
-            // Kiểm tra form đăng nhập có tồn tại
+            // Check if login form exists
             $this->waitForElement(WebDriverBy::name('email'), 5);
             
-            // Điền thông tin đăng nhập
-            $this->fillInput(WebDriverBy::name('email'), $this->userEmail, 'Email user');
-            $this->fillInput(WebDriverBy::name('password'), $this->userPassword, 'Password user');
+            // Fill login credentials
+            $this->fillInput(WebDriverBy::name('email'), $this->userEmail, 'User email');
+            $this->fillInput(WebDriverBy::name('password'), $this->userPassword, 'User password');
             
-            $this->pauseForObservation(2, "Đã điền thông tin đăng nhập user");
+            $this->pauseForObservation(2, "User login credentials filled");
             
-            // Click đăng nhập
-            $this->clickElement(WebDriverBy::name('submit'), 'Nút đăng nhập user');
+            // Click login
+            $this->clickElement(WebDriverBy::name('submit'), 'User login button');
             
-            $this->pauseForObservation(3, "Chờ kết quả đăng nhập");
-            $this->logSuccess("Đăng nhập user thành công!");
+            $this->pauseForObservation(3, "Waiting for login result");
+            $this->logSuccess("User login successful!");
         } catch (Exception $e) {
-            $this->logWarning("Không thể đăng nhập hoặc user chưa tồn tại: " . $e->getMessage());
-            $this->logInfo("Thử truy cập trực tiếp trang booking...");
+            $this->logWarning("Unable to login or user doesn't exist: " . $e->getMessage());
+            $this->logInfo("Trying direct access to booking page...");
         }
     }
     
     /**
-     * Test đặt bàn hợp lệ
+     * Test valid booking
      */
     public function testValidBooking()
     {
-        $this->logStep(2, "Test đặt bàn hợp lệ");
+        $this->logStep(2, "Testing valid booking");
         
-        // Thử đăng nhập user trước
+        // Try user login first
         $this->loginUser();
         
-        // Điều hướng đến trang đặt bàn
-        $this->logAction("Điều hướng đến trang đặt bàn");
+        // Navigate to booking page
+        $this->logAction("Navigating to booking page");
         $this->driver->get($this->baseUrl . '/booking/book.php');
-        $this->pauseForObservation(2, "Trang đặt bàn đã load");
+        $this->pauseForObservation(2, "Booking page loaded");
         
         try {
-            // Kiểm tra form đặt bàn có load không
+            // Check if booking form loaded
             $this->waitForElement(WebDriverBy::name('first_name'), 10);
-            $this->logSuccess("Form đặt bàn đã load thành công");
+            $this->logSuccess("Booking form loaded successfully");
             
-            // Điền thông tin đặt bàn
-            $this->fillInput(WebDriverBy::name('first_name'), $this->testBookingData['first_name'], 'Họ');
-            $this->fillInput(WebDriverBy::name('last_name'), $this->testBookingData['last_name'], 'Tên');
-            $this->fillInput(WebDriverBy::name('phone_number'), $this->testBookingData['phone_number'], 'Số điện thoại');
-            $this->fillInput(WebDriverBy::name('message'), $this->testBookingData['message'], 'Ghi chú');
+            // Fill booking information
+            $this->fillInput(WebDriverBy::name('first_name'), $this->testBookingData['first_name'], 'First name');
+            $this->fillInput(WebDriverBy::name('last_name'), $this->testBookingData['last_name'], 'Last name');
+            $this->fillInput(WebDriverBy::name('phone_number'), $this->testBookingData['phone_number'], 'Phone number');
+            $this->fillInput(WebDriverBy::name('message'), $this->testBookingData['message'], 'Message');
             
-            // Chọn ngày (ngày mai)
+            // Select date (tomorrow)
             $tomorrow = date('Y-m-d', strtotime('+1 day'));
-            $this->fillInput(WebDriverBy::name('date'), $tomorrow, 'Ngày đặt bàn');
+            $this->fillInput(WebDriverBy::name('date'), $tomorrow, 'Booking date');
             
-            // Chọn giờ
+            // Select time
             try {
                 $timeSelect = new WebDriverSelect($this->waitForElement(WebDriverBy::name('time')));
                 $timeSelect->selectByValue('18:00');
-                $this->logAction("Chọn giờ: 18:00 từ dropdown");
+                $this->logAction("Selected time: 18:00 from dropdown");
             } catch (Exception $e) {
-                // Nếu không có select, thử input text
-                $this->fillInput(WebDriverBy::name('time'), '18:00', 'Giờ đặt bàn');
+                // If no select, try text input
+                $this->fillInput(WebDriverBy::name('time'), '18:00', 'Booking time');
             }
             
-            $this->pauseForObservation(3, "Đã điền đầy đủ thông tin đặt bàn");
+            $this->pauseForObservation(3, "All booking information filled");
             
             // Submit form
-            $this->clickElement(WebDriverBy::name('submit'), 'Nút xác nhận đặt bàn');
+            $this->clickElement(WebDriverBy::name('submit'), 'Booking confirmation button');
             
-            $this->pauseForObservation(4, "Chờ kết quả đặt bàn");
+            $this->pauseForObservation(4, "Waiting for booking result");
             
-            // Kiểm tra kết quả
+            // Check result
             try {
                 $this->assertElementExists(WebDriverBy::className('alert-success'));
-                $this->logSuccess("Đặt bàn thành công!");
+                $this->logSuccess("Booking successful!");
             } catch (Exception $e) {
-                // Kiểm tra có chuyển hướng đến trang xác nhận không
+                // Check if redirected to confirmation page
                 $currentUrl = $this->driver->getCurrentURL();
                 if (strpos($currentUrl, 'success') !== false || strpos($currentUrl, 'thank') !== false) {
-                    $this->logSuccess("Đặt bàn thành công (chuyển hướng)!");
+                    $this->logSuccess("Booking successful (redirected)!");
                 } else {
-                    $this->logWarning("Không tìm thấy thông báo thành công rõ ràng");
+                    $this->logWarning("No clear success message found");
                     $this->takeScreenshot('booking_result_unclear');
                 }
             }
             
         } catch (Exception $e) {
-            $this->logError("Lỗi trong quá trình đặt bàn: " . $e->getMessage());
+            $this->logError("Error during booking process: " . $e->getMessage());
             $this->takeScreenshot('booking_form_error');
             throw $e;
         }
     }
     
     /**
-     * Test validation form đặt bàn
+     * Test booking form validation
      */
     public function testBookingFormValidation()
     {
-        echo "\n📝 Test 3: Validation form đặt bàn...\n";
+        $this->logStep(3, "Testing booking form validation");
         
-        // Điều hướng đến trang đặt bàn
+        // Navigate to booking page
         $this->driver->get($this->baseUrl . '/booking/book.php');
-        sleep(2);
+        $this->pauseForObservation(2, "Booking page loaded for validation test");
         
         try {
-            // Test submit form trống
-            $this->clickElement(WebDriverBy::name('submit'));
-            sleep(1);
+            // Test submit empty form
+            $this->logAction("Testing submit with empty form");
+            $this->clickElement(WebDriverBy::name('submit'), 'Submit button (empty form)');
+            $this->pauseForObservation(1, "Checking empty form validation");
             
-            // Test với thông tin không đầy đủ
-            $this->fillInput(WebDriverBy::name('first_name'), 'Test');
-            $this->clickElement(WebDriverBy::name('submit'));
-            sleep(1);
+            // Test with incomplete information
+            $this->logAction("Testing with incomplete information");
+            $this->fillInput(WebDriverBy::name('first_name'), 'Test', 'First name only');
+            $this->clickElement(WebDriverBy::name('submit'), 'Submit button (incomplete)');
+            $this->pauseForObservation(1, "Checking incomplete form validation");
             
-            // Test với số điện thoại không hợp lệ
-            $this->fillInput(WebDriverBy::name('first_name'), $this->testBookingData['first_name']);
-            $this->fillInput(WebDriverBy::name('last_name'), $this->testBookingData['last_name']);
-            $this->fillInput(WebDriverBy::name('phone_number'), '123'); // Số không hợp lệ
-            $this->clickElement(WebDriverBy::name('submit'));
-            sleep(1);
+            // Test with invalid phone number
+            $this->logAction("Testing with invalid phone number");
+            $this->fillInput(WebDriverBy::name('first_name'), $this->testBookingData['first_name'], 'First name');
+            $this->fillInput(WebDriverBy::name('last_name'), $this->testBookingData['last_name'], 'Last name');
+            $this->fillInput(WebDriverBy::name('phone_number'), '123', 'Invalid phone number'); // Invalid number
+            $this->clickElement(WebDriverBy::name('submit'), 'Submit button (invalid phone)');
+            $this->pauseForObservation(1, "Checking phone validation");
             
-            echo "   ✅ Form validation hoạt động!\n";
+            $this->logSuccess("Form validation working!");
             
         } catch (Exception $e) {
-            echo "   ⚠️ Có thể form validation chưa được implement đầy đủ\n";
+            $this->logWarning("Form validation may not be fully implemented");
         }
     }
     
     /**
-     * Test chọn ngày và giờ
+     * Test date and time selection
      */
     public function testDateTimeSelection()
     {
-        echo "\n⏰ Test 4: Chọn ngày và giờ...\n";
+        $this->logStep(4, "Testing date and time selection");
         
-        // Điều hướng đến trang đặt bàn
+        // Navigate to booking page
         $this->driver->get($this->baseUrl . '/booking/book.php');
-        sleep(2);
+        $this->pauseForObservation(2, "Booking page loaded for date/time test");
         
         try {
-            // Test chọn ngày trong quá khứ (nếu có validation)
+            // Test past date selection (if validation exists)
+            $this->logAction("Testing past date selection");
             $yesterday = date('Y-m-d', strtotime('-1 day'));
-            $this->fillInput(WebDriverBy::name('date'), $yesterday);
+            $this->fillInput(WebDriverBy::name('date'), $yesterday, 'Past date');
             
-            // Test chọn ngày hôm nay
+            // Test today's date
+            $this->logAction("Testing today's date");
             $today = date('Y-m-d');
-            $this->fillInput(WebDriverBy::name('date'), $today);
+            $this->fillInput(WebDriverBy::name('date'), $today, 'Today\'s date');
             
-            // Test chọn ngày tương lai
+            // Test future date
+            $this->logAction("Testing future date");
             $nextWeek = date('Y-m-d', strtotime('+7 days'));
-            $this->fillInput(WebDriverBy::name('date'), $nextWeek);
+            $this->fillInput(WebDriverBy::name('date'), $nextWeek, 'Future date');
             
-            // Test các khung giờ khác nhau
+            // Test different time slots
+            $this->logAction("Testing different time slots");
             try {
                 $timeField = $this->waitForElement(WebDriverBy::name('time'));
                 $timeField->clear();
-                $timeField->sendKeys('12:00'); // Giờ trưa
+                $timeField->sendKeys('12:00'); // Lunch time
                 
                 $timeField->clear();
-                $timeField->sendKeys('19:30'); // Giờ tối
+                $timeField->sendKeys('19:30'); // Evening time
                 
             } catch (Exception $e) {
-                echo "   ⚠️ Time field có thể là dropdown hoặc có format khác\n";
+                $this->logWarning("Time field may be dropdown or different format");
             }
             
-            echo "   ✅ Date/Time selection hoạt động!\n";
+            $this->logSuccess("Date/Time selection working!");
             
         } catch (Exception $e) {
-            echo "   ⚠️ Lỗi khi test date/time: " . $e->getMessage() . "\n";
+            $this->logWarning("Error testing date/time: " . $e->getMessage());
         }
     }
 }
 
-// Chạy test nếu file được gọi trực tiếp
+// Run test if file is called directly
 if (basename(__FILE__) == basename($_SERVER["SCRIPT_NAME"])) {
     $test = new BookingTest();
     $test->runAllTests();
