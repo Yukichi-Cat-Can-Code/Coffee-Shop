@@ -1,8 +1,8 @@
 <?php
-session_start();
+ini_set('session.cookie_httponly', 1);
+ini_set('session.use_strict_mode', 1);
+// session_start();
 require "../config/config.php";
-
-define("ADMINAPPURL", "http://localhost/coffee-Shop/admin-panel");
 
 
 if (!isset($_SESSION['admin_name'])) {

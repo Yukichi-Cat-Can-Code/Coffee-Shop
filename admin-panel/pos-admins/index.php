@@ -2,8 +2,6 @@
 require "../../config/config.php";
 requireAdminLogin();
 
-define("ADMINAPPURL", "http://localhost/coffee-Shop/admin-panel");
-
 // Xử lý AJAX request tìm kiếm khách hàng
 if (isset($_GET['ajax']) && $_GET['ajax'] === 'search-customers') {
     if (!isset($_SESSION['admin_name'])) {
