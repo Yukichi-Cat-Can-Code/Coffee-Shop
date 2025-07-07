@@ -50,9 +50,9 @@ Chào mừng bạn đến với dự án Coffee Shop E-Commerce Website!
 
 - **Tài khoản quản trị (Admin):**
 
-  - Đường dẫn: [http://localhost/Coffee-Shop/admin/](http://localhost/Coffee-Shop/admin/)
-  - Username: `admin`
-  - Password: `admin123`
+  - Đường dẫn: [http://localhost/Coffee-Shop/admin/](http://localhost/Coffee-Shop/admin-panel/)
+  - Username: `maiminh123@gmail.com`
+  - Password: `maiminh123`
 
 - **Tài khoản khách hàng (Store):**
   - Đường dẫn: [http://localhost/Coffee-Shop/](http://localhost/Coffee-Shop/)
