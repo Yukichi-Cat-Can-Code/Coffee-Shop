@@ -25,6 +25,7 @@ try {
 	$bookings->bindParam(":user_id", $user_id);
 	$bookings->execute();
 	$bookings_values = $bookings->fetchAll(PDO::FETCH_OBJ);
+	
 } catch (PDOException $e) {
 	// Log lỗi và khởi tạo mảng trống
 	error_log("Database Error in bookings.php: " . $e->getMessage());

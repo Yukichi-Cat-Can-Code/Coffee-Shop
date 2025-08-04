@@ -30,6 +30,9 @@ try {
 	$orders->bindParam(":user_id", $user_id, PDO::PARAM_INT);
 	$orders->execute();
 	$orders_values = $orders->fetchAll(PDO::FETCH_OBJ);
+	var_dump($user_id);
+exit;
+
 } catch (PDOException $e) {
 	// Log lỗi database
 	error_log("Database Error in orders.php: " . $e->getMessage());

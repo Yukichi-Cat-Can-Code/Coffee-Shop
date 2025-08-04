@@ -33,7 +33,7 @@ echo.
 echo ==========================================
 echo   ⚙️ CURRENT CONFIGURATION
 echo ==========================================
-echo   🖥️ ChromeDriver: LOCAL (D:\App\Selenium\chromedriver-win64)
+echo   🖥️ ChromeDriver: LOCAL (E:\HK3 24-25\BTPM\chromedriver-win64\chromedriver-win64)
 echo   🌐 Website: http://localhost/Coffee-Shop  
 echo   👁️ UI Mode: ENABLED (browser hiển thị)
 echo   🐳 Docker: DISABLED (không cần container)

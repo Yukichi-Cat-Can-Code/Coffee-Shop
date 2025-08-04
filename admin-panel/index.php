@@ -132,7 +132,12 @@ try {
             <i class="fas fa-file-export me-1"></i> Reports
           </button>
           <ul class="dropdown-menu shadow-sm" aria-labelledby="reportDropdown">
-            <li><a class="dropdown-item" href="#"><i class="fas fa-chart-bar me-2"></i> Sales Report</a></li>
+<li>
+  <a class="dropdown-item" href="/Coffee-Shop/admin-panel/admins/sales-report.php">
+  <i class="fas fa-chart-bar me-2"></i> Sales Report
+</a>
+
+</li>
             <li><a class="dropdown-item" href="#"><i class="fas fa-chart-pie me-2"></i> Inventory Report</a></li>
             <li><a class="dropdown-item" href="#"><i class="fas fa-users me-2"></i> Customer Report</a></li>
           </ul>

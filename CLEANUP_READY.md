@@ -28,7 +28,7 @@
 ## 🎯 TÌNH TRẠNG HIỆN TẠI
 
 ### Hệ thống hoạt động
-- ✅ **ChromeDriver**: `D:\App\Selenium\chromedriver-win64\chromedriver.exe` - Version 138.0.7204.92
+- ✅ **ChromeDriver**: `E:\HK3 24-25\BTPM\chromedriver-win64\chromedriver-win64\chromedriver.exe` - Version 138.0.7204.92
 - ✅ **Website**: `http://localhost/Coffee-Shop` - HTTP 200 OK
 - ✅ **Browser automation**: Hoạt động hoàn hảo, có thể quan sát trực tiếp
 - ✅ **Tests**: Tất cả tests chạy ổn định

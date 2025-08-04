@@ -127,7 +127,7 @@ php tests/BookingTest.php
 1. **Backup First**: Script will ask for confirmation
 2. **No Undo**: Deleted files cannot be recovered easily
 3. **Test After**: Run `check_chromedriver.bat` after cleanup
-4. **ChromeDriver Path**: Must exist at `D:\App\Selenium\chromedriver-win64\chromedriver.exe`
+4. **ChromeDriver Path**: Must exist at `E:\HK3 24-25\BTPM\chromedriver-win64\chromedriver-win64\chromedriver.exe`
 
 ## 🎉 RESULT
 

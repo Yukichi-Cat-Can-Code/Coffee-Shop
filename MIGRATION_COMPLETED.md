@@ -85,7 +85,7 @@ php tests/WatchOnlyTest.php
 
 ### ChromeDriver Status
 ```
-✅ ChromeDriver file found at: D:\App\Selenium\chromedriver-win64\chromedriver.exe
+✅ ChromeDriver file found at: E:\HK3 24-25\BTPM\chromedriver-win64\chromedriver-win64\chromedriver.exe
 ✅ ChromeDriver version: 138.0.7204.92
 ✅ ChromeDriver is executable
 ```

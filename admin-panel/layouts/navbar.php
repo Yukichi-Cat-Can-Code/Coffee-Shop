@@ -12,7 +12,7 @@
             </div>
             <div class="brand-titles">
                 <h1 class="brand-name">Artisan Coffee</h1>
-                <div class="brand-tagline">Premium Management</div>
+                <!-- <div class="brand-tagline">Premium Management</div> -->
             </div>
         </a>
 

@@ -11,7 +11,7 @@ echo    ✓ No Docker required
 echo    ✓ Chrome opens on your desktop
 echo    ✓ No screenshots - just watching
 echo.
-echo 🖥️ ChromeDriver: D:\App\Selenium\chromedriver-win64
+echo 🖥️ ChromeDriver: E:\HK3 24-25\BTPM\chromedriver-win64\chromedriver-win64
 echo 🌐 Website: http://localhost/Coffee-Shop
 echo 👁️ Browser will open automatically
 echo ⏱️ Demo runs for about 3-4 minutes
@@ -36,6 +36,6 @@ echo   ✓ Direct browser control
 echo   ✓ Smooth animations and interactions
 echo   ✓ Responsive design testing
 echo.
-echo 💡 ChromeDriver used: D:\App\Selenium\chromedriver-win64
+echo 💡 ChromeDriver used: E:\HK3 24-25\BTPM\chromedriver-win64\chromedriver-win64
 echo.
 pause

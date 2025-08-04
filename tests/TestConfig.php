@@ -14,7 +14,7 @@ class TestConfig
     
     // Cấu hình ChromeDriver (Local)
     const USE_LOCAL_CHROMEDRIVER = true;  // true = local ChromeDriver, false = Docker Selenium
-    const CHROMEDRIVER_PATH = 'D:\\App\\Selenium\\chromedriver-win64\\chromedriver.exe';
+    const CHROMEDRIVER_PATH = 'E:\\HK3 24-25\\BTPM\\chromedriver-win64\\chromedriver-win64\\chromedriver.exe';
     const SELENIUM_HOST = 'http://localhost:4444';  // Only used if USE_LOCAL_CHROMEDRIVER = false
     const IMPLICIT_WAIT = 10;       // Giây chờ element tự động
     const EXPLICIT_WAIT = 15;       // Giây chờ điều kiện cụ thể

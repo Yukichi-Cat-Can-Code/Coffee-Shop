@@ -6,7 +6,7 @@ echo   🔍 CHECKING CHROMEDRIVER SETUP
 echo ==========================================
 echo.
 
-set CHROMEDRIVER_PATH=D:\App\Selenium\chromedriver-win64\chromedriver.exe
+set CHROMEDRIVER_PATH=E:\HK3 24-25\BTPM\chromedriver-win64\chromedriver-win64\chromedriver.exe
 
 echo 📁 Checking ChromeDriver path...
 echo    Path: %CHROMEDRIVER_PATH%

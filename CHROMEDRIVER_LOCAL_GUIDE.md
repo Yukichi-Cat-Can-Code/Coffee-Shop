@@ -12,7 +12,7 @@ Dự án Coffee Shop hiện đã được cấu hình để sử dụng **Chrome
 
 ### ChromeDriver Path
 ```
-D:\App\Selenium\chromedriver-win64\chromedriver.exe
+E:\HK3 24-25\BTPM\chromedriver-win64\chromedriver-win64chromedriver.exe
 ```
 
 ### Website URL  
@@ -117,7 +117,7 @@ const SLOW_MODE = true;  // Chậm để quan sát
 ### ChromeDriver không tìm thấy
 ```bash
 # Kiểm tra file tồn tại
-dir "D:\App\Selenium\chromedriver-win64\chromedriver.exe"
+dir "E:\HK3 24-25\BTPM\chromedriver-win64\chromedriver-win64\chromedriver.exe"
 
 # Chạy kiểm tra
 check_chromedriver.bat
