@@ -1,9 +1,128 @@
 <?php
+
 require "../../config/config.php";
 requireAdminLogin();
 
+// Helper functions - đưa lên đầu file để có thể sử dụng ở mọi nơi
+function getMembershipTierName($tierCode, $tiers = [])
+{
+    foreach ($tiers as $tier) {
+        if ($tier['tier_key'] === $tierCode) {
+            return $tier['tier_name'];
+        }
+    }
+
+    switch ($tierCode) {
+        case 'bronze':
+            return 'Hạng Đồng';
+        case 'silver':
+            return 'Hạng Bạc';
+        case 'gold':
+            return 'Hạng Vàng';
+        default:
+            return 'Chưa có hạng';
+    }
+}
+
+function getMembershipBadgeClass($tierCode)
+{
+    switch ($tierCode) {
+        case 'bronze':
+            return 'bronze';
+        case 'silver':
+            return 'secondary';
+        case 'gold':
+            return 'gold';
+        default:
+            return 'light';
+    }
+}
+
+function getMembershipCardClass($tierCode)
+{
+    switch ($tierCode) {
+        case 'bronze':
+            return 'bg-gradient-warning';
+        case 'silver':
+            return 'bg-gradient-secondary';
+        case 'gold':
+            return 'bg-gradient-primary';
+        default:
+            return 'bg-gradient-dark';
+    }
+}
+
+function getMembershipCardIcon($tierCode)
+{
+    switch ($tierCode) {
+        case 'bronze':
+            return 'fa-medal';
+        case 'silver':
+            return 'fa-medal';
+        case 'gold':
+            return 'fa-crown';
+        default:
+            return 'fa-user';
+    }
+}
+
+function getActionBadgeClass($action)
+{
+    switch ($action) {
+        case 'earned':
+            return 'success';
+        case 'used':
+            return 'info';
+        case 'expired':
+            return 'danger';
+        case 'adjusted':
+            return 'warning';
+        default:
+            return 'secondary';
+    }
+}
+
+function getActionName($action)
+{
+    switch ($action) {
+        case 'earned':
+            return 'Tích lũy';
+        case 'used':
+            return 'Sử dụng';
+        case 'expired':
+            return 'Hết hạn';
+        case 'adjusted':
+            return 'Điều chỉnh';
+        default:
+            return ucfirst($action);
+    }
+}
+
+function getStatusBadgeClass($status)
+{
+    switch (strtolower($status)) {
+        case 'completed':
+        case 'đã hoàn thành':
+        case 'đã thanh toán':
+            return 'success';
+        case 'pending':
+        case 'đang chờ':
+            return 'warning';
+        case 'cancelled':
+        case 'đã hủy':
+            return 'danger';
+        default:
+            return 'info';
+    }
+}
+
 // Lấy ID thành viên từ URL
 $memberId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+
+if ($memberId <= 0) {
+    header("Location: members.php?error=invalid_id");
+    exit;
+}
 
 // Xử lý cập nhật điểm và hạng thủ công
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -18,6 +137,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $currentPointsStmt = $conn->prepare("SELECT membership_points FROM users WHERE ID = :id");
             $currentPointsStmt->bindParam(':id', $memberId, PDO::PARAM_INT);
             $currentPointsStmt->execute();
+
+            if ($currentPointsStmt->rowCount() === 0) {
+                throw new Exception("Không tìm thấy thành viên");
+            }
+
             $currentPoints = $currentPointsStmt->fetch(PDO::FETCH_ASSOC)['membership_points'];
 
             // Cập nhật điểm
@@ -37,7 +161,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 INSERT INTO membership_point_history (user_id, points, action, notes) 
                 VALUES (:user_id, :points, :action, :notes)
             ");
-            $actionType = $points >= 0 ? 'adjusted' : 'adjusted';
+            $actionType = $points >= 0 ? 'earned' : 'used';
             $historyStmt->bindParam(':user_id', $memberId, PDO::PARAM_INT);
             $historyStmt->bindParam(':points', $points, PDO::PARAM_INT);
             $historyStmt->bindParam(':action', $actionType, PDO::PARAM_STR);
@@ -64,11 +188,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $successMessage = "Đã cập nhật hạng thành viên thành công.";
         }
-    } catch (PDOException $e) {
+    } catch (Exception $e) {
         if (isset($conn) && $conn->inTransaction()) {
             $conn->rollBack();
         }
         $errorMessage = "Lỗi: " . $e->getMessage();
+    }
+}
+
+// Cập nhật hạng thành viên tự động dựa trên điểm
+function updateMembershipTier($conn, $userId, $points)
+{
+    // Lấy mức hạng dựa trên điểm
+    $stmt = $conn->prepare("
+        SELECT tier_key
+        FROM membership_tiers 
+        WHERE status = 'active' AND min_points <= :points
+        ORDER BY min_points DESC
+        LIMIT 1
+    ");
+    $stmt->bindParam(':points', $points, PDO::PARAM_INT);
+    $stmt->execute();
+
+    if ($stmt->rowCount() > 0) {
+        $tier = $stmt->fetch(PDO::FETCH_ASSOC)['tier_key']; // Sửa lỗi tier_code thành tier_key
+
+        // Cập nhật hạng mới
+        $updateStmt = $conn->prepare("
+            UPDATE users 
+            SET membership_tier = :tier, last_tier_update = CURRENT_DATE
+            WHERE ID = :id
+        ");
+        $updateStmt->bindParam(':tier', $tier, PDO::PARAM_STR);
+        $updateStmt->bindParam(':id', $userId, PDO::PARAM_INT);
+        $updateStmt->execute();
     }
 }
 
@@ -77,7 +230,19 @@ try {
     $stmt = $conn->prepare("
         SELECT u.*, 
                COUNT(DISTINCT o.ID) as total_online_orders,
-               COUNT(DISTINCT p.ID) as total_pos_orders
+               COUNT(DISTINCT p.order_id) as total_pos_orders, 
+               COALESCE(SUM(
+                   CASE
+                       WHEN o.created_at >= DATE_SUB(CURRENT_DATE, INTERVAL 1 YEAR) THEN o.payable_total_cost
+                       ELSE 0 
+                   END
+               ), 0) +
+               COALESCE(SUM(
+                   CASE 
+                       WHEN p.created_at >= DATE_SUB(CURRENT_DATE, INTERVAL 1 YEAR) THEN p.final_amount 
+                       ELSE 0
+                   END
+               ), 0) as annual_spend
         FROM users u
         LEFT JOIN orders o ON u.ID = o.user_id
         LEFT JOIN pos_orders p ON u.ID = p.customer_id
@@ -88,7 +253,7 @@ try {
     $stmt->execute();
 
     if ($stmt->rowCount() === 0) {
-        header("Location: members.php");
+        header("Location: members.php?error=not_found");
         exit;
     }
 
@@ -117,11 +282,11 @@ try {
          ORDER BY created_at DESC
          LIMIT 5)
         UNION ALL
-        (SELECT 'pos' as type, ID as order_id, final_amount as amount, created_at, order_status as status
-         FROM pos_orders
-         WHERE customer_id = :customer_id
-         ORDER BY created_at DESC
-         LIMIT 5)
+        (SELECT 'pos' as type, order_id, final_amount as amount, created_at, order_status as status
+        FROM pos_orders
+        WHERE customer_id = :customer_id
+        ORDER BY created_at DESC
+        LIMIT 5)
         ORDER BY created_at DESC
         LIMIT 10
     ");
@@ -131,41 +296,40 @@ try {
     $recentOrders = $ordersStmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     error_log('Membership Error: ' . $e->getMessage());
-    header("Location: members.php");
+    header("Location: members.php?error=db_error");
     exit;
-}
-
-// Cập nhật hạng thành viên tự động dựa trên điểm
-function updateMembershipTier($conn, $userId, $points)
-{
-    // Lấy mức hạng dựa trên điểm
-    $stmt = $conn->prepare("
-        SELECT tier_code 
-        FROM membership_tiers 
-        WHERE status = 'active' AND min_points <= :points
-        ORDER BY min_points DESC
-        LIMIT 1
-    ");
-    $stmt->bindParam(':points', $points, PDO::PARAM_INT);
-    $stmt->execute();
-
-    if ($stmt->rowCount() > 0) {
-        $tier = $stmt->fetch(PDO::FETCH_ASSOC)['tier_code'];
-
-        // Cập nhật hạng mới
-        $updateStmt = $conn->prepare("
-            UPDATE users 
-            SET membership_tier = :tier, last_tier_update = CURRENT_DATE
-            WHERE ID = :id
-        ");
-        $updateStmt->bindParam(':tier', $tier, PDO::PARAM_STR);
-        $updateStmt->bindParam(':id', $userId, PDO::PARAM_INT);
-        $updateStmt->execute();
-    }
 }
 
 require "../layouts/header.php";
 ?>
+<style>
+    .badge-bronze {
+        background-color: #CD7F32;
+        color: #fff;
+    }
+
+    .badge-gold {
+        background-color: #FFD700;
+        color: #000;
+    }
+
+    .membership-card .card {
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .bg-gradient-primary {
+        background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%);
+    }
+
+    .bg-gradient-warning {
+        background: linear-gradient(87deg, #fb6340 0, #fbb140 100%);
+    }
+
+    .bg-gradient-secondary {
+        background: linear-gradient(87deg, #8898aa 0, #888aaa 100%);
+    }
+</style>
 
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -176,11 +340,21 @@ require "../layouts/header.php";
     </div>
 
     <?php if (isset($successMessage)): ?>
-        <div class="alert alert-success"><?= $successMessage ?></div>
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle mr-1"></i> <?= $successMessage ?>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
     <?php endif; ?>
 
     <?php if (isset($errorMessage)): ?>
-        <div class="alert alert-danger"><?= $errorMessage ?></div>
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-circle mr-1"></i> <?= $errorMessage ?>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
     <?php endif; ?>
 
     <div class="row">
@@ -189,8 +363,9 @@ require "../layouts/header.php";
             <div class="card shadow h-100">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
                     <h6 class="m-0 font-weight-bold text-primary">Thông tin thành viên</h6>
-                    <span class="badge badge-pill badge-<?= getMembershipBadgeClass($member['membership_tier'] ?? '') ?>">
-                        <?= getMembershipTierName($member['membership_tier'] ?? '') ?>
+                    <span class="badge badge-pill badge-<?= getMembershipBadgeClass($member['membership_tier'] ?? '') ?>"
+                        style="padding: 8px 12px; font-size: 90%;">
+                        <?= getMembershipTierName($member['membership_tier'] ?? '', $tiers) ?>
                     </span>
                 </div>
                 <div class="card-body">
@@ -198,6 +373,9 @@ require "../layouts/header.php";
                         <i class="fas fa-user-circle fa-5x text-gray-300 mb-3"></i>
                         <h5 class="font-weight-bold"><?= htmlspecialchars($member['user_name']) ?></h5>
                         <p class="mb-0"><?= htmlspecialchars($member['user_email']) ?></p>
+                        <?php if (!empty($member['user_phone'])): ?>
+                            <p class="mb-0"><?= htmlspecialchars($member['user_phone']) ?></p>
+                        <?php endif; ?>
                         <p class="text-muted small">
                             Tham gia: <?= date('d/m/Y', strtotime($member['created_at'])) ?>
                         </p>
@@ -211,18 +389,20 @@ require "../layouts/header.php";
                         </div>
                         <div class="d-flex justify-content-between">
                             <span>Chi tiêu trong năm:</span>
-                            <span class="font-weight-bold"><?= number_format($member['annual_spend'], 3, ',', '.') ?> đ</span>
+                            <span class="font-weight-bold">
+                                <?= isset($member['annual_spend']) ? number_format($member['annual_spend'], 0, ',', '.') : '0' ?> đ
+                            </span>
                         </div>
                         <div class="d-flex justify-content-between">
                             <span>Ngày hết hạn điểm:</span>
                             <span class="font-weight-bold">
-                                <?= $member['points_expiry_date'] ? date('d/m/Y', strtotime($member['points_expiry_date'])) : 'N/A' ?>
+                                <?= !empty($member['points_reset_date']) ? date('d/m/Y', strtotime($member['points_reset_date'])) : 'N/A' ?>
                             </span>
                         </div>
                         <div class="d-flex justify-content-between">
                             <span>Cập nhật hạng gần nhất:</span>
                             <span class="font-weight-bold">
-                                <?= $member['last_tier_update'] ? date('d/m/Y', strtotime($member['last_tier_update'])) : 'N/A' ?>
+                                <?= !empty($member['last_tier_update']) ? date('d/m/Y', strtotime($member['last_tier_update'])) : 'N/A' ?>
                             </span>
                         </div>
                     </div>
@@ -271,7 +451,7 @@ require "../layouts/header.php";
                                     <div class="text-right">
                                         <small class="d-block">HẠNG THÀNH VIÊN</small>
                                         <span class="text-uppercase">
-                                            <?= getMembershipTierName($member['membership_tier'] ?? 'Chưa có hạng') ?>
+                                            <?= getMembershipTierName($member['membership_tier'] ?? '', $tiers) ?>
                                         </span>
                                     </div>
                                 </div>
@@ -292,8 +472,8 @@ require "../layouts/header.php";
                                     <select name="tier" id="tier" class="form-control">
                                         <option value="">-- Không có hạng --</option>
                                         <?php foreach ($tiers as $tier): ?>
-                                            <option value="<?= $tier['tier_code'] ?>"
-                                                <?= ($member['membership_tier'] == $tier['tier_code']) ? 'selected' : '' ?>>
+                                            <option value="<?= $tier['tier_key'] ?>"
+                                                <?= ($member['membership_tier'] == $tier['tier_key']) ? 'selected' : '' ?>>
                                                 <?= htmlspecialchars($tier['tier_name']) ?>
                                                 (<?= number_format($tier['discount_percent'], 1) ?>% giảm)
                                             </option>
@@ -321,10 +501,19 @@ require "../layouts/header.php";
                         <input type="hidden" name="action" value="adjust_points">
 
                         <div class="form-group">
-                            <label for="points">Số điểm điều chỉnh (dương/âm):</label>
-                            <input type="number" class="form-control" name="points" id="points" required>
-                            <small class="form-text text-muted">
-                                Nhập số dương để thêm điểm, số âm để trừ điểm.
+                            <label for="points">Số điểm điều chỉnh:</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <select class="form-control" id="point-action">
+                                        <option value="add">Thêm (+)</option>
+                                        <option value="subtract">Trừ (-)</option>
+                                        <option value="set">Đặt lại</option>
+                                    </select>
+                                </div>
+                                <input type="number" class="form-control" name="points" id="points" required min="0">
+                            </div>
+                            <small class="form-text text-muted" id="points-help">
+                                Thêm điểm vào tài khoản thành viên.
                             </small>
                         </div>
 
@@ -425,7 +614,7 @@ require "../layouts/header.php";
                                                     <span class="badge badge-primary">POS</span>
                                                 <?php endif; ?>
                                             </td>
-                                            <td><?= number_format($order['amount'], 3, ',', '.') ?> đ</td>
+                                            <td><?= number_format($order['amount'], 0, ',', '.') ?> đ</td>
                                             <td><?= date('d/m/Y H:i', strtotime($order['created_at'])) ?></td>
                                             <td>
                                                 <span class="badge badge-<?= getStatusBadgeClass($order['status']) ?>">
@@ -444,120 +633,46 @@ require "../layouts/header.php";
     </div>
 </div>
 
-<style>
-    .membership-card .card {
-        border-radius: 15px;
-        overflow: hidden;
-    }
-</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Xử lý thay đổi loại điều chỉnh điểm
+        const pointActionSelect = document.getElementById('point-action');
+        const pointsInput = document.getElementById('points');
+        const pointsHelp = document.getElementById('points-help');
 
-<?php
-// Helper functions
-function getMembershipTierName($tierCode)
-{
-    switch ($tierCode) {
-        case 'bronze':
-            return 'Hạng Đồng';
-        case 'silver':
-            return 'Hạng Bạc';
-        case 'gold':
-            return 'Hạng Vàng';
-        default:
-            return 'Chưa có hạng';
-    }
-}
+        pointActionSelect.addEventListener('change', function() {
+            switch (this.value) {
+                case 'add':
+                    pointsHelp.textContent = 'Thêm điểm vào tài khoản thành viên.';
+                    pointsInput.name = 'points';
+                    break;
+                case 'subtract':
+                    pointsHelp.textContent = 'Trừ điểm khỏi tài khoản thành viên.';
+                    pointsInput.name = 'points';
+                    break;
+                case 'set':
+                    pointsHelp.textContent = 'Đặt lại tổng điểm của thành viên.';
+                    pointsInput.name = 'set_points';
+                    break;
+            }
+        });
 
-function getMembershipBadgeClass($tierCode)
-{
-    switch ($tierCode) {
-        case 'bronze':
-            return 'warning';
-        case 'silver':
-            return 'secondary';
-        case 'gold':
-            return 'warning';
-        default:
-            return 'light';
-    }
-}
+        // Submit form handler
+        const form = document.querySelector('form[action=""][name="action"][value="adjust_points"]');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const pointAction = pointActionSelect.value;
+                const pointsValue = parseInt(pointsInput.value);
 
-function getMembershipCardClass($tierCode)
-{
-    switch ($tierCode) {
-        case 'bronze':
-            return 'bg-gradient-warning';
-        case 'silver':
-            return 'bg-gradient-secondary';
-        case 'gold':
-            return 'bg-gradient-warning';
-        default:
-            return 'bg-gradient-dark';
-    }
-}
+                if (pointAction === 'subtract') {
+                    // Chuyển giá trị thành số âm khi chọn trừ điểm
+                    pointsInput.value = -Math.abs(pointsValue);
+                }
 
-function getMembershipCardIcon($tierCode)
-{
-    switch ($tierCode) {
-        case 'bronze':
-            return 'fa-medal';
-        case 'silver':
-            return 'fa-medal';
-        case 'gold':
-            return 'fa-crown';
-        default:
-            return 'fa-user';
-    }
-}
+                // Form sẽ submit bình thường
+            });
+        }
+    });
+</script>
 
-function getActionBadgeClass($action)
-{
-    switch ($action) {
-        case 'earned':
-            return 'success';
-        case 'used':
-            return 'info';
-        case 'expired':
-            return 'danger';
-        case 'adjusted':
-            return 'warning';
-        default:
-            return 'secondary';
-    }
-}
-
-function getActionName($action)
-{
-    switch ($action) {
-        case 'earned':
-            return 'Tích lũy';
-        case 'used':
-            return 'Sử dụng';
-        case 'expired':
-            return 'Hết hạn';
-        case 'adjusted':
-            return 'Điều chỉnh';
-        default:
-            return ucfirst($action);
-    }
-}
-
-function getStatusBadgeClass($status)
-{
-    switch (strtolower($status)) {
-        case 'completed':
-        case 'đã hoàn thành':
-        case 'đã thanh toán':
-            return 'success';
-        case 'pending':
-        case 'đang chờ':
-            return 'warning';
-        case 'cancelled':
-        case 'đã hủy':
-            return 'danger';
-        default:
-            return 'info';
-    }
-}
-
-require "../layouts/footer.php";
-?>
+<?php require "../layouts/footer.php"; ?>

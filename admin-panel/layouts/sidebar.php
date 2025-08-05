@@ -37,6 +37,11 @@
                 <i class="fas fa-star me-2"></i>Reviews
             </a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" id="reviews-link" href="<?php echo ADMINAPPURL; ?>/membership-admin/index.php">
+                <i class="fas fa-star me-2"></i>Membership
+            </a>
+        </li>
         <a class="nav-link" id="about-link" href="<?php echo ADMINAPPURL; ?>/admins/about.php">
             <i class="fas fa-info-circle me-2"></i>About
         </a>
