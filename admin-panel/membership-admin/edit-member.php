@@ -20,7 +20,7 @@ try {
     $stmt->execute();
 
     if ($stmt->rowCount() == 0) {
-        throw new Exception("Không tìm thấy thành viên");
+        throw new Exception("Can not find member with ID: $memberId");
     }
 
     $member = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -43,7 +43,7 @@ try {
 
         // Validate
         if ($points < 0) {
-            throw new Exception("Điểm không được âm");
+            throw new Exception("Points cannot be negative");
         }
 
         // Cập nhật thông tin thành viên
@@ -74,7 +74,7 @@ try {
             $historyStmt->execute();
         }
 
-        $successMessage = "Cập nhật thông tin thành viên thành công!";
+        $successMessage = "Update member information successfully!";
 
         // Refresh data
         $stmt = $conn->prepare("SELECT * FROM users WHERE id = :id LIMIT 1");
@@ -95,9 +95,9 @@ require "../layouts/header.php";
 
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Chỉnh sửa thành viên</h1>
+        <h1 class="h3 mb-0 text-gray-800">Edit member</h1>
         <a href="members.php" class="btn btn-secondary">
-            <i class="fas fa-arrow-left mr-1"></i> Quay lại danh sách
+            <i class="fas fa-arrow-left mr-1"></i> Back to list
         </a>
     </div>
 
@@ -115,12 +115,12 @@ require "../layouts/header.php";
                 <!-- Thông tin thành viên -->
                 <div class="card shadow mb-4">
                     <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                        <h6 class="m-0 font-weight-bold text-primary">Thông tin thành viên</h6>
+                        <h6 class="m-0 font-weight-bold text-primary">Member Information</h6>
                     </div>
                     <div class="card-body">
                         <form action="" method="post">
                             <div class="mb-3">
-                                <label>Họ và tên</label>
+                                <label>Full Name</label>
                                 <input type="text" class="form-control" value="<?= htmlspecialchars($member['username']) ?>" readonly>
                             </div>
                             <div class="mb-3">
@@ -128,25 +128,25 @@ require "../layouts/header.php";
                                 <input type="email" class="form-control" value="<?= htmlspecialchars($member['user_email']) ?>" readonly>
                             </div>
                             <div class="mb-3">
-                                <label>Điểm tích lũy</label>
+                                <label>Accumulated Points</label>
                                 <input type="number" class="form-control" name="points" value="<?= htmlspecialchars($member['membership_points']) ?>" step="1" min="0" required>
                             </div>
                             <div class="mb-3">
-                                <label>Hạng thành viên</label>
+                                <label>Membership Tier</label>
                                 <select class="form-control" name="tier">
-                                    <option value="none" <?= $member['membership_tier'] == 'none' ? 'selected' : '' ?>>Không có hạng</option>
-                                    <option value="bronze" <?= $member['membership_tier'] == 'bronze' ? 'selected' : '' ?>>Hạng Đồng</option>
-                                    <option value="silver" <?= $member['membership_tier'] == 'silver' ? 'selected' : '' ?>>Hạng Bạc</option>
-                                    <option value="gold" <?= $member['membership_tier'] == 'gold' ? 'selected' : '' ?>>Hạng Vàng</option>
+                                    <option value="none" <?= $member['membership_tier'] == 'none' ? 'selected' : '' ?>>No Tier</option>
+                                    <option value="bronze" <?= $member['membership_tier'] == 'bronze' ? 'selected' : '' ?>>Bronze Tier</option>
+                                    <option value="silver" <?= $member['membership_tier'] == 'silver' ? 'selected' : '' ?>>Silver Tier</option>
+                                    <option value="gold" <?= $member['membership_tier'] == 'gold' ? 'selected' : '' ?>>Gold Tier</option>
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label>Ghi chú thay đổi</label>
-                                <textarea class="form-control" name="notes" rows="3" placeholder="Nhập lý do thay đổi điểm/hạng (nếu có)"></textarea>
+                                <label>Change Notes</label>
+                                <textarea class="form-control" name="notes" rows="3" placeholder="Enter reason for point/tier change (if any)"></textarea>
                             </div>
                             <div class="mt-3">
                                 <button type="submit" name="update_member" class="btn btn-primary">
-                                    <i class="fas fa-save mr-1"></i> Cập nhật
+                                    <i class="fas fa-save mr-1"></i> Update
                                 </button>
                             </div>
                         </form>
@@ -158,23 +158,23 @@ require "../layouts/header.php";
                 <!-- Lịch sử điểm -->
                 <div class="card shadow mb-4">
                     <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Lịch sử điểm tích lũy</h6>
+                        <h6 class="m-0 font-weight-bold text-primary">Accumulated Points History</h6>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
                             <table class="table table-bordered" width="100%" cellspacing="0">
                                 <thead>
                                     <tr>
-                                        <th>Thời gian</th>
-                                        <th>Thay đổi điểm</th>
-                                        <th>Lý do</th>
+                                        <th>Time</th>
+                                        <th>Points Change</th>
+                                        <th>Reason</th>
                                         <th>Admin</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php if (empty($pointsHistory)): ?>
                                         <tr>
-                                            <td colspan="4" class="text-center">Chưa có lịch sử điểm nào</td>
+                                            <td colspan="4" class="text-center">There is no points history available.</td>
                                         </tr>
                                     <?php else: ?>
                                         <?php foreach ($pointsHistory as $record): ?>
@@ -184,7 +184,7 @@ require "../layouts/header.php";
                                                     <?= $record['points_change'] > 0 ? '+' : '' ?><?= $record['points_change'] ?>
                                                 </td>
                                                 <td><?= htmlspecialchars($record['reason']) ?></td>
-                                                <td><?= $record['admin_id'] ? 'Admin #' . $record['admin_id'] : 'Hệ thống' ?></td>
+                                                <td><?= $record['admin_id'] ? 'Admin #' . $record['admin_id'] : 'System' ?></td>
                                             </tr>
                                         <?php endforeach; ?>
                                     <?php endif; ?>

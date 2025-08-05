@@ -3,7 +3,7 @@
 require "../../config/config.php";
 requireAdminLogin();
 
-// Helper functions - đưa lên đầu file để có thể sử dụng ở mọi nơi
+// Helper functions - moved to top to be usable everywhere
 function getMembershipTierName($tierCode, $tiers = [])
 {
     foreach ($tiers as $tier) {
@@ -14,13 +14,13 @@ function getMembershipTierName($tierCode, $tiers = [])
 
     switch ($tierCode) {
         case 'bronze':
-            return 'Hạng Đồng';
+            return 'Bronze Tier';
         case 'silver':
-            return 'Hạng Bạc';
+            return 'Silver Tier';
         case 'gold':
-            return 'Hạng Vàng';
+            return 'Gold Tier';
         default:
-            return 'Chưa có hạng';
+            return 'No Tier';
     }
 }
 
@@ -86,13 +86,13 @@ function getActionName($action)
 {
     switch ($action) {
         case 'earned':
-            return 'Tích lũy';
+            return 'Earned';
         case 'used':
-            return 'Sử dụng';
+            return 'Used';
         case 'expired':
-            return 'Hết hạn';
+            return 'Expired';
         case 'adjusted':
-            return 'Điều chỉnh';
+            return 'Adjusted';
         default:
             return ucfirst($action);
     }
@@ -116,7 +116,7 @@ function getStatusBadgeClass($status)
     }
 }
 
-// Lấy ID thành viên từ URL
+// Get member ID from URL
 $memberId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 if ($memberId <= 0) {
@@ -124,7 +124,7 @@ if ($memberId <= 0) {
     exit;
 }
 
-// Xử lý cập nhật điểm và hạng thủ công
+// Handle manual points and tier updates
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
@@ -133,30 +133,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $points = (int)$_POST['points'];
             $notes = trim($_POST['notes']);
 
-            // Lấy điểm hiện tại
+            // Get current points
             $currentPointsStmt = $conn->prepare("SELECT membership_points FROM users WHERE ID = :id");
             $currentPointsStmt->bindParam(':id', $memberId, PDO::PARAM_INT);
             $currentPointsStmt->execute();
 
             if ($currentPointsStmt->rowCount() === 0) {
-                throw new Exception("Không tìm thấy thành viên");
+                throw new Exception("Member not found");
             }
 
             $currentPoints = $currentPointsStmt->fetch(PDO::FETCH_ASSOC)['membership_points'];
 
-            // Cập nhật điểm
+            // Update points
             $newPoints = $currentPoints + $points;
             if ($newPoints < 0) $newPoints = 0;
 
             $conn->beginTransaction();
 
-            // Cập nhật điểm cho user
+            // Update user points
             $updateStmt = $conn->prepare("UPDATE users SET membership_points = :points WHERE ID = :id");
             $updateStmt->bindParam(':points', $newPoints, PDO::PARAM_INT);
             $updateStmt->bindParam(':id', $memberId, PDO::PARAM_INT);
             $updateStmt->execute();
 
-            // Thêm vào lịch sử điểm
+            // Add to points history
             $historyStmt = $conn->prepare("
                 INSERT INTO membership_point_history (user_id, points, action, notes) 
                 VALUES (:user_id, :points, :action, :notes)
@@ -168,14 +168,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $historyStmt->bindParam(':notes', $notes, PDO::PARAM_STR);
             $historyStmt->execute();
 
-            // Tự động cập nhật hạng dựa trên điểm mới
+            // Auto update tier based on new points
             updateMembershipTier($conn, $memberId, $newPoints);
 
             $conn->commit();
-            $successMessage = "Đã cập nhật điểm thành công.";
+            $successMessage = "Point update successful.";
         } elseif ($action === 'change_tier') {
             $newTier = $_POST['tier'];
-            $notes = "Thay đổi hạng thành viên thủ công sang: " . $newTier;
+            $notes = "Changed membership tier manually to: " . $newTier;
 
             $updateStmt = $conn->prepare("
                 UPDATE users 
@@ -186,20 +186,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $updateStmt->bindParam(':id', $memberId, PDO::PARAM_INT);
             $updateStmt->execute();
 
-            $successMessage = "Đã cập nhật hạng thành viên thành công.";
+            $successMessage = "Membership tier updated successfully.";
         }
     } catch (Exception $e) {
         if (isset($conn) && $conn->inTransaction()) {
             $conn->rollBack();
         }
-        $errorMessage = "Lỗi: " . $e->getMessage();
+        $errorMessage = "Error: " . $e->getMessage();
     }
 }
 
-// Cập nhật hạng thành viên tự động dựa trên điểm
+// Auto update membership tier based on points
 function updateMembershipTier($conn, $userId, $points)
 {
-    // Lấy mức hạng dựa trên điểm
+    // Get tier level based on points
     $stmt = $conn->prepare("
         SELECT tier_key
         FROM membership_tiers 
@@ -211,9 +211,9 @@ function updateMembershipTier($conn, $userId, $points)
     $stmt->execute();
 
     if ($stmt->rowCount() > 0) {
-        $tier = $stmt->fetch(PDO::FETCH_ASSOC)['tier_key']; // Sửa lỗi tier_code thành tier_key
+        $tier = $stmt->fetch(PDO::FETCH_ASSOC)['tier_key'];
 
-        // Cập nhật hạng mới
+        // Update new tier
         $updateStmt = $conn->prepare("
             UPDATE users 
             SET membership_tier = :tier, last_tier_update = CURRENT_DATE
@@ -225,7 +225,7 @@ function updateMembershipTier($conn, $userId, $points)
     }
 }
 
-// Lấy thông tin thành viên
+// Get member information
 try {
     $stmt = $conn->prepare("
         SELECT u.*, 
@@ -259,7 +259,7 @@ try {
 
     $member = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Lấy lịch sử điểm
+    // Get points history
     $historyStmt = $conn->prepare("
         SELECT * FROM membership_point_history
         WHERE user_id = :user_id
@@ -270,11 +270,11 @@ try {
     $historyStmt->execute();
     $pointHistory = $historyStmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Lấy danh sách tiers
+    // Get tier list
     $tiersStmt = $conn->query("SELECT * FROM membership_tiers WHERE status = 'active' ORDER BY min_points ASC");
     $tiers = $tiersStmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Lấy thông tin đơn hàng gần đây
+    // Get recent orders
     $ordersStmt = $conn->prepare("
         (SELECT 'online' as type, ID as order_id, payable_total_cost as amount, created_at, status
          FROM orders
@@ -333,9 +333,9 @@ require "../layouts/header.php";
 
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Chi tiết thành viên</h1>
+        <h1 class="h3 mb-0 text-gray-800">Member Details</h1>
         <a href="members.php" class="btn btn-secondary">
-            <i class="fas fa-arrow-left mr-1"></i> Quay lại danh sách
+            <i class="fas fa-arrow-left mr-1"></i> Back to List
         </a>
     </div>
 
@@ -358,11 +358,11 @@ require "../layouts/header.php";
     <?php endif; ?>
 
     <div class="row">
-        <!-- Thông tin thành viên -->
+        <!-- Member Information -->
         <div class="col-xl-4 col-md-6 mb-4">
             <div class="card shadow h-100">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 font-weight-bold text-primary">Thông tin thành viên</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Member Information</h6>
                     <span class="badge badge-pill badge-<?= getMembershipBadgeClass($member['membership_tier'] ?? '') ?>"
                         style="padding: 8px 12px; font-size: 90%;">
                         <?= getMembershipTierName($member['membership_tier'] ?? '', $tiers) ?>
@@ -377,30 +377,30 @@ require "../layouts/header.php";
                             <p class="mb-0"><?= htmlspecialchars($member['user_phone']) ?></p>
                         <?php endif; ?>
                         <p class="text-muted small">
-                            Tham gia: <?= date('d/m/Y', strtotime($member['created_at'])) ?>
+                            Join Date: <?= date('d/m/Y', strtotime($member['created_at'])) ?>
                         </p>
                     </div>
 
                     <div class="mb-3">
-                        <h6 class="font-weight-bold">Tình trạng thành viên:</h6>
+                        <h6 class="font-weight-bold">Membership Status:</h6>
                         <div class="d-flex justify-content-between">
-                            <span>Điểm tích lũy:</span>
+                            <span>Points:</span>
                             <span class="font-weight-bold"><?= number_format($member['membership_points']) ?></span>
                         </div>
                         <div class="d-flex justify-content-between">
-                            <span>Chi tiêu trong năm:</span>
+                            <span>Annual Spend:</span>
                             <span class="font-weight-bold">
-                                <?= isset($member['annual_spend']) ? number_format($member['annual_spend'], 0, ',', '.') : '0' ?> đ
+                                <?= isset($member['annual_spend']) ? number_format($member['annual_spend'], 0, ',', '.') : '0' ?> VND
                             </span>
                         </div>
                         <div class="d-flex justify-content-between">
-                            <span>Ngày hết hạn điểm:</span>
+                            <span>Points Reset Date:</span>
                             <span class="font-weight-bold">
                                 <?= !empty($member['points_reset_date']) ? date('d/m/Y', strtotime($member['points_reset_date'])) : 'N/A' ?>
                             </span>
                         </div>
                         <div class="d-flex justify-content-between">
-                            <span>Cập nhật hạng gần nhất:</span>
+                            <span>Last Tier Update:</span>
                             <span class="font-weight-bold">
                                 <?= !empty($member['last_tier_update']) ? date('d/m/Y', strtotime($member['last_tier_update'])) : 'N/A' ?>
                             </span>
@@ -408,17 +408,17 @@ require "../layouts/header.php";
                     </div>
 
                     <div class="mb-3">
-                        <h6 class="font-weight-bold">Đơn hàng:</h6>
+                        <h6 class="font-weight-bold">Order Statistics:</h6>
                         <div class="d-flex justify-content-between">
-                            <span>Đơn hàng online:</span>
+                            <span>Online Orders:</span>
                             <span class="font-weight-bold"><?= $member['total_online_orders'] ?></span>
                         </div>
                         <div class="d-flex justify-content-between">
-                            <span>Đơn hàng POS:</span>
+                            <span>POS Orders:</span>
                             <span class="font-weight-bold"><?= $member['total_pos_orders'] ?></span>
                         </div>
                         <div class="d-flex justify-content-between">
-                            <span>Tổng đơn hàng:</span>
+                            <span>Total Orders:</span>
                             <span class="font-weight-bold"><?= $member['total_online_orders'] + $member['total_pos_orders'] ?></span>
                         </div>
                     </div>
@@ -426,11 +426,11 @@ require "../layouts/header.php";
             </div>
         </div>
 
-        <!-- Thẻ thành viên -->
+        <!-- Membership Card -->
         <div class="col-xl-4 col-md-6 mb-4">
             <div class="card shadow h-100">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Thẻ thành viên</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Membership Card</h6>
                 </div>
                 <div class="card-body d-flex flex-column">
                     <div class="membership-card mb-3 flex-grow-1">
@@ -441,15 +441,15 @@ require "../layouts/header.php";
                                     <h5 class="card-title">Coffee Shop</h5>
                                     <i class="fas <?= getMembershipCardIcon($member['membership_tier'] ?? '') ?> fa-2x"></i>
                                 </div>
-                                <p class="text-uppercase mt-4 mb-0">THÀNH VIÊN</p>
+                                <p class="text-uppercase mt-4 mb-0">MEMBERSHIP</p>
                                 <h4 class="font-weight-bold"><?= htmlspecialchars($member['user_name']) ?></h4>
                                 <div class="d-flex justify-content-between mt-3">
                                     <div>
-                                        <small class="d-block">MEMBERSHIP ID</small>
+                                        <small class="d-block">MEMBER ID</small>
                                         <span>#<?= str_pad($member['ID'], 6, '0', STR_PAD_LEFT) ?></span>
                                     </div>
                                     <div class="text-right">
-                                        <small class="d-block">HẠNG THÀNH VIÊN</small>
+                                        <small class="d-block">TIER</small>
                                         <span class="text-uppercase">
                                             <?= getMembershipTierName($member['membership_tier'] ?? '', $tiers) ?>
                                         </span>
@@ -459,29 +459,29 @@ require "../layouts/header.php";
                         </div>
                     </div>
 
-                    <!-- Thay đổi hạng thành viên -->
+                    <!-- Change Membership Tier -->
                     <div class="card mb-3">
                         <div class="card-header bg-light py-2">
-                            <h6 class="m-0 font-weight-bold text-primary">Thay đổi hạng thành viên</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Change Membership Tier</h6>
                         </div>
                         <div class="card-body py-3">
                             <form action="" method="POST">
                                 <input type="hidden" name="action" value="change_tier">
                                 <div class="form-group">
-                                    <label for="tier">Chọn hạng mới:</label>
+                                    <label for="tier">Select new tier:</label>
                                     <select name="tier" id="tier" class="form-control">
-                                        <option value="">-- Không có hạng --</option>
+                                        <option value="">-- No tier --</option>
                                         <?php foreach ($tiers as $tier): ?>
                                             <option value="<?= $tier['tier_key'] ?>"
                                                 <?= ($member['membership_tier'] == $tier['tier_key']) ? 'selected' : '' ?>>
                                                 <?= htmlspecialchars($tier['tier_name']) ?>
-                                                (<?= number_format($tier['discount_percent'], 1) ?>% giảm)
+                                                (<?= number_format($tier['discount_percent'], 1) ?>% discount)
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
                                 <button type="submit" class="btn btn-primary btn-block">
-                                    <i class="fas fa-save mr-1"></i> Cập nhật hạng
+                                    <i class="fas fa-save mr-1"></i> Update Tier
                                 </button>
                             </form>
                         </div>
@@ -490,40 +490,40 @@ require "../layouts/header.php";
             </div>
         </div>
 
-        <!-- Điều chỉnh điểm -->
+        <!-- Adjust Points -->
         <div class="col-xl-4 col-md-12 mb-4">
             <div class="card shadow h-100">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Điều chỉnh điểm thành viên</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Adjust Member Points</h6>
                 </div>
                 <div class="card-body">
                     <form action="" method="POST">
                         <input type="hidden" name="action" value="adjust_points">
 
                         <div class="form-group">
-                            <label for="points">Số điểm điều chỉnh:</label>
+                            <label for="points">Adjust points:</label>
                             <div class="input-group">
                                 <div class="input-group-prepend">
                                     <select class="form-control" id="point-action">
-                                        <option value="add">Thêm (+)</option>
-                                        <option value="subtract">Trừ (-)</option>
-                                        <option value="set">Đặt lại</option>
+                                        <option value="add">Add (+)</option>
+                                        <option value="subtract">Subtract (-)</option>
+                                        <option value="set">Set</option>
                                     </select>
                                 </div>
                                 <input type="number" class="form-control" name="points" id="points" required min="0">
                             </div>
                             <small class="form-text text-muted" id="points-help">
-                                Thêm điểm vào tài khoản thành viên.
+                                Add points to the member's account.
                             </small>
                         </div>
 
                         <div class="form-group">
-                            <label for="notes">Ghi chú:</label>
-                            <textarea name="notes" id="notes" rows="3" class="form-control"></textarea>
+                            <label for="notes">Notes:</label>
+                            <textarea name="notes" id="notes" rows="3" class="form-control" placeholder="Reason for point adjustment..."></textarea>
                         </div>
 
                         <button type="submit" class="btn btn-success btn-block">
-                            <i class="fas fa-check mr-1"></i> Cập nhật điểm
+                            <i class="fas fa-check mr-1"></i> Update Points
                         </button>
                     </form>
 
@@ -531,7 +531,7 @@ require "../layouts/header.php";
 
                     <div class="alert alert-info small">
                         <i class="fas fa-info-circle mr-1"></i>
-                        Điều chỉnh điểm thành viên sẽ tự động cập nhật hạng thành viên tương ứng.
+                        Adjusting member points will automatically update the corresponding membership tier.
                     </div>
                 </div>
             </div>
@@ -539,24 +539,24 @@ require "../layouts/header.php";
     </div>
 
     <div class="row">
-        <!-- Lịch sử điểm -->
+        <!-- Points History -->
         <div class="col-xl-6 mb-4">
             <div class="card shadow">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Lịch sử điểm</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Points History</h6>
                 </div>
                 <div class="card-body">
                     <?php if (empty($pointHistory)): ?>
-                        <div class="alert alert-info">Chưa có lịch sử điểm nào.</div>
+                        <div class="alert alert-info">No points history available.</div>
                     <?php else: ?>
                         <div class="table-responsive">
                             <table class="table table-bordered table-hover" width="100%" cellspacing="0">
                                 <thead>
                                     <tr>
-                                        <th>Ngày</th>
-                                        <th>Điểm</th>
-                                        <th>Hành động</th>
-                                        <th>Ghi chú</th>
+                                        <th>Date</th>
+                                        <th>Points</th>
+                                        <th>Action</th>
+                                        <th>Notes</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -582,25 +582,25 @@ require "../layouts/header.php";
             </div>
         </div>
 
-        <!-- Đơn hàng gần đây -->
+        <!-- Recent Orders -->
         <div class="col-xl-6 mb-4">
             <div class="card shadow">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Đơn hàng gần đây</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Recent Orders</h6>
                 </div>
                 <div class="card-body">
                     <?php if (empty($recentOrders)): ?>
-                        <div class="alert alert-info">Chưa có đơn hàng nào.</div>
+                        <div class="alert alert-info">No recent orders available.</div>
                     <?php else: ?>
                         <div class="table-responsive">
                             <table class="table table-bordered table-hover" width="100%" cellspacing="0">
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Loại</th>
-                                        <th>Tổng tiền</th>
-                                        <th>Ngày</th>
-                                        <th>Trạng thái</th>
+                                        <th>Order ID</th>
+                                        <th>Type</th>
+                                        <th>Amount</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -614,7 +614,7 @@ require "../layouts/header.php";
                                                     <span class="badge badge-primary">POS</span>
                                                 <?php endif; ?>
                                             </td>
-                                            <td><?= number_format($order['amount'], 0, ',', '.') ?> đ</td>
+                                            <td><?= number_format($order['amount'], 0, ',', '.') ?> VND</td>
                                             <td><?= date('d/m/Y H:i', strtotime($order['created_at'])) ?></td>
                                             <td>
                                                 <span class="badge badge-<?= getStatusBadgeClass($order['status']) ?>">
@@ -635,7 +635,7 @@ require "../layouts/header.php";
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Xử lý thay đổi loại điều chỉnh điểm
+        // Handle point adjustment type change
         const pointActionSelect = document.getElementById('point-action');
         const pointsInput = document.getElementById('points');
         const pointsHelp = document.getElementById('points-help');
@@ -643,33 +643,33 @@ require "../layouts/header.php";
         pointActionSelect.addEventListener('change', function() {
             switch (this.value) {
                 case 'add':
-                    pointsHelp.textContent = 'Thêm điểm vào tài khoản thành viên.';
+                    pointsHelp.textContent = 'Add points to member account.';
                     pointsInput.name = 'points';
                     break;
                 case 'subtract':
-                    pointsHelp.textContent = 'Trừ điểm khỏi tài khoản thành viên.';
+                    pointsHelp.textContent = 'Subtract points from member account.';
                     pointsInput.name = 'points';
                     break;
                 case 'set':
-                    pointsHelp.textContent = 'Đặt lại tổng điểm của thành viên.';
+                    pointsHelp.textContent = 'Set total points for this member.';
                     pointsInput.name = 'set_points';
                     break;
             }
         });
 
         // Submit form handler
-        const form = document.querySelector('form[action=""][name="action"][value="adjust_points"]');
-        if (form) {
+        const form = document.querySelector('form[action=""]');
+        if (form && form.querySelector('input[name="action"][value="adjust_points"]')) {
             form.addEventListener('submit', function(e) {
                 const pointAction = pointActionSelect.value;
                 const pointsValue = parseInt(pointsInput.value);
 
                 if (pointAction === 'subtract') {
-                    // Chuyển giá trị thành số âm khi chọn trừ điểm
+                    // Convert value to negative when subtracting points
                     pointsInput.value = -Math.abs(pointsValue);
                 }
 
-                // Form sẽ submit bình thường
+                // Form will submit normally
             });
         }
     });

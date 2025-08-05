@@ -365,10 +365,12 @@ CREATE TABLE IF NOT EXISTS `membership_tiers` (
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dữ liệu ban đầu cho bảng membership_tiers
-INSERT INTO `membership_tiers` (`tier_name`, `tier_key`, `min_points`, `discount_percent`, `tier_color`, `tier_icon`, `status`) VALUES
-('Hạng Đồng', 'bronze', 0, 5, '#cd7f32', 'fa-medal', 'active'),
-('Hạng Bạc', 'silver', 200, 10, '#c0c0c0', 'fa-medal', 'active'),
-('Hạng Vàng', 'gold', 500, 15, '#ffd700', 'fa-medal', 'active');
+INSERT INTO `membership_tiers` 
+(`tier_name`, `tier_key`, `min_points`, `discount_percent`, `tier_color`, `tier_icon`, `status`) 
+VALUES
+('Bronze Tier', 'bronze', 0, 5, '#cd7f32', 'fa-medal', 'active'),
+('Silver Tier', 'silver', 200, 10, '#c0c0c0', 'fa-medal', 'active'),
+('Gold Tier', 'gold', 500, 15, '#ffd700', 'fa-medal', 'active');
 
 -- Bảng cấu hình quy tắc membership
 CREATE TABLE IF NOT EXISTS `membership_rules` (
@@ -526,6 +528,17 @@ BEGIN
 END//
 
 DELIMITER ;
+
+-- Tạm thời tắt foreign key checks
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- Cập nhật dữ liệu membership_tier trong users
+UPDATE users SET membership_tier = 'none' WHERE membership_tier IS NULL OR membership_tier = '';
+
+-- Bật lại foreign key checks
+SET FOREIGN_KEY_CHECKS = 1;
+
+DESCRIBE users;
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;

@@ -2,14 +2,14 @@
 require "../../config/config.php";
 requireAdminLogin();
 
-// Lấy tổng số thành viên theo từng hạng mức
+// Get total members by membership tiers
 $stats = [];
 try {
-    // Tổng số thành viên
+    // Total members
     $totalStmt = $conn->query("SELECT COUNT(*) as count FROM users WHERE user_email IS NOT NULL");
     $stats['total'] = $totalStmt->fetch(PDO::FETCH_ASSOC)['count'] ?? 0;
 
-    // Thống kê theo mức hạng
+    // Statistics by membership tier
     $tierStmt = $conn->query("
         SELECT 
             COALESCE(membership_tier, 'none') as membership_tier, 
@@ -27,18 +27,18 @@ try {
     ");
     $tierData = $tierStmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Xử lý dữ liệu để hiển thị
+    // Process data for display
     $stats['tiers'] = [];
     foreach ($tierData as $tier) {
         $tierKey = $tier['membership_tier'] ?? 'none';
         $stats['tiers'][$tierKey] = $tier['count'];
     }
 
-    // Lấy thông tin quy tắc hiện tại
+    // Get current rules information
     $rulesStmt = $conn->query("SELECT * FROM membership_rules WHERE is_active = 1 LIMIT 1");
     $rules = $rulesStmt->fetch(PDO::FETCH_ASSOC);
 
-    // Nếu không có quy tắc nào, tạo giá trị mặc định
+    // If no rules exist, create default values
     if (!$rules) {
         $rules = [
             'points_per_order' => 0.1,
@@ -47,11 +47,11 @@ try {
         ];
     }
 
-    // Lấy thông tin các mức hạng với kiểm tra đầy đủ
+    // Get membership tier information with full validation
     $tiersStmt = $conn->query("SELECT * FROM membership_tiers WHERE status = 'active' ORDER BY min_points ASC");
     $tiers = $tiersStmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Lấy thống kê chi tiết hơn
+    // Get detailed statistics
     $advancedStatsStmt = $conn->query("
         SELECT 
             COALESCE(membership_tier, 'none') as tier,
@@ -66,7 +66,7 @@ try {
     ");
     $advancedStats = $advancedStatsStmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    // Log lỗi
+    // Log error
     error_log('Membership Dashboard Error: ' . $e->getMessage());
     $stats['total'] = 0;
     $stats['tiers'] = [];
@@ -79,26 +79,26 @@ try {
     $advancedStats = [];
 }
 
-// Helper function để lấy tên hạng
+// Helper function to get tier display name
 function getTierDisplayName($tierKey)
 {
     switch ($tierKey) {
         case 'bronze':
-            return 'Hạng Đồng';
+            return 'Bronze Tier';
         case 'silver':
-            return 'Hạng Bạc';
+            return 'Silver Tier';
         case 'gold':
-            return 'Hạng Vàng';
+            return 'Gold Tier';
         case 'none':
         case null:
         case '':
-            return 'Chưa có hạng';
+            return 'No Tier';
         default:
             return ucfirst($tierKey);
     }
 }
 
-// Helper function để lấy màu sắc
+// Helper function to get tier color
 function getTierColor($tierKey)
 {
     switch ($tierKey) {
@@ -113,7 +113,7 @@ function getTierColor($tierKey)
     }
 }
 
-// Helper function để lấy icon
+// Helper function to get tier icon
 function getTierIcon($tierKey)
 {
     switch ($tierKey) {
@@ -149,23 +149,23 @@ require "../layouts/header.php";
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0 text-gray-800">
-            <i class="fas fa-crown mr-2"></i>Quản lý Membership
+            <i class="fas fa-crown mr-2"></i>Membership Management
         </h1>
         <div>
-            <span class="badge badge-info">Tổng: <?= number_format($stats['total']) ?> thành viên</span>
+            <span class="badge badge-info">Total: <?= number_format($stats['total']) ?> members</span>
         </div>
     </div>
 
-    <!-- Thống kê tổng quan -->
+    <!-- Overview Statistics -->
     <div class="row mb-4">
-        <!-- Tổng số thành viên -->
+        <!-- Total Members -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2 tier-card">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Tổng số thành viên</div>
+                                Total Members</div>
                             <div class="stats-number text-gray-800"><?= number_format($stats['total']) ?></div>
                         </div>
                         <div class="col-auto">
@@ -176,14 +176,14 @@ require "../layouts/header.php";
             </div>
         </div>
 
-        <!-- Thành viên hạng Vàng -->
+        <!-- Gold Tier Members -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-warning shadow h-100 py-2 tier-card" style="border-left: 4px solid #FFD700 !important;">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-uppercase mb-1" style="color: #B8860B;">
-                                Hạng Vàng</div>
+                                Gold Tier</div>
                             <div class="stats-number text-gray-800">
                                 <?= number_format($stats['tiers']['gold'] ?? 0) ?>
                             </div>
@@ -196,14 +196,14 @@ require "../layouts/header.php";
             </div>
         </div>
 
-        <!-- Thành viên hạng Bạc -->
+        <!-- Silver Tier Members -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-secondary shadow h-100 py-2 tier-card" style="border-left: 4px solid #C0C0C0 !important;">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-uppercase mb-1" style="color: #708090;">
-                                Hạng Bạc</div>
+                                Silver Tier</div>
                             <div class="stats-number text-gray-800">
                                 <?= number_format($stats['tiers']['silver'] ?? 0) ?>
                             </div>
@@ -216,14 +216,14 @@ require "../layouts/header.php";
             </div>
         </div>
 
-        <!-- Thành viên hạng Đồng -->
+        <!-- Bronze Tier Members -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-warning shadow h-100 py-2 tier-card" style="border-left: 4px solid #CD7F32 !important;">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-uppercase mb-1" style="color: #8B4513;">
-                                Hạng Đồng</div>
+                                Bronze Tier</div>
                             <div class="stats-number text-gray-800">
                                 <?= number_format($stats['tiers']['bronze'] ?? 0) ?>
                             </div>
@@ -237,19 +237,19 @@ require "../layouts/header.php";
         </div>
     </div>
 
-    <!-- Danh sách tính năng -->
+    <!-- Feature List -->
     <div class="row mb-4">
         <div class="col-lg-6 mb-4">
             <div class="card shadow h-100">
                 <div class="card-header py-3 bg-primary text-white">
                     <h6 class="m-0 font-weight-bold">
-                        <i class="fas fa-users mr-2"></i>Quản lý thành viên
+                        <i class="fas fa-users mr-2"></i>Member Management
                     </h6>
                 </div>
                 <div class="card-body d-flex flex-column">
-                    <p class="flex-grow-1">Quản lý danh sách thành viên và xem chi tiết thông tin của từng thành viên.</p>
+                    <p class="flex-grow-1">Manage member list and view detailed information for each member.</p>
                     <a href="members.php" class="btn btn-primary btn-block">
-                        <i class="fas fa-users mr-1"></i> Danh sách thành viên
+                        <i class="fas fa-users mr-1"></i> Member List
                     </a>
                 </div>
             </div>
@@ -259,32 +259,32 @@ require "../layouts/header.php";
             <div class="card shadow h-100">
                 <div class="card-header py-3 bg-success text-white">
                     <h6 class="m-0 font-weight-bold">
-                        <i class="fas fa-cog mr-2"></i>Cài đặt mức hạng
+                        <i class="fas fa-cog mr-2"></i>Tier Settings
                     </h6>
                 </div>
                 <div class="card-body d-flex flex-column">
-                    <p class="flex-grow-1">Cấu hình các mức hạng thành viên và phần trăm giảm giá tương ứng.</p>
+                    <p class="flex-grow-1">Configure membership tiers and their corresponding discount percentages.</p>
                     <a href="tier-settings.php" class="btn btn-success btn-block">
-                        <i class="fas fa-medal mr-1"></i> Cài đặt mức hạng
+                        <i class="fas fa-medal mr-1"></i> Tier Settings
                     </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Hàng 2 -->
+    <!-- Row 2 -->
     <div class="row mb-4">
         <div class="col-lg-6 mb-4">
             <div class="card shadow h-100">
                 <div class="card-header py-3 bg-info text-white">
                     <h6 class="m-0 font-weight-bold">
-                        <i class="fas fa-list-ol mr-2"></i>Cài đặt quy tắc
+                        <i class="fas fa-list-ol mr-2"></i>Rules Settings
                     </h6>
                 </div>
                 <div class="card-body d-flex flex-column">
-                    <p class="flex-grow-1">Thiết lập quy tắc tích điểm, thời gian reset và điều kiện giữ hạng.</p>
+                    <p class="flex-grow-1">Set up point accumulation rules, reset period and tier retention conditions.</p>
                     <a href="rules-settings.php" class="btn btn-info btn-block">
-                        <i class="fas fa-ruler mr-1"></i> Cài đặt quy tắc
+                        <i class="fas fa-ruler mr-1"></i> Rules Settings
                     </a>
                 </div>
             </div>
@@ -294,29 +294,29 @@ require "../layouts/header.php";
             <div class="card shadow h-100">
                 <div class="card-header py-3 bg-secondary text-white">
                     <h6 class="m-0 font-weight-bold">
-                        <i class="fas fa-chart-bar mr-2"></i>Báo cáo membership
+                        <i class="fas fa-chart-bar mr-2"></i>Membership Reports
                     </h6>
                 </div>
                 <div class="card-body d-flex flex-column">
-                    <p class="flex-grow-1">Xem báo cáo và thống kê về chương trình membership.</p>
+                    <p class="flex-grow-1">View reports and statistics about the membership program.</p>
                     <a href="reports.php" class="btn btn-secondary btn-block">
-                        <i class="fas fa-chart-line mr-1"></i> Xem báo cáo
+                        <i class="fas fa-chart-line mr-1"></i> View Reports
                     </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Bảng thông tin quy tắc hiện tại -->
+    <!-- Current Rules Information Table -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="card shadow">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-rules mr-2"></i>Quy tắc membership hiện tại
+                        <i class="fas fa-rules mr-2"></i>Current Membership Rules
                     </h6>
                     <a href="rules-settings.php" class="btn btn-sm btn-primary">
-                        <i class="fas fa-edit"></i> Chỉnh sửa
+                        <i class="fas fa-edit"></i> Edit
                     </a>
                 </div>
                 <div class="card-body">
@@ -325,26 +325,26 @@ require "../layouts/header.php";
                             <tbody>
                                 <tr>
                                     <th style="width: 40%;">
-                                        <i class="fas fa-coins mr-2 text-warning"></i>Điểm tích lũy mỗi 10.000đ
+                                        <i class="fas fa-coins mr-2 text-warning"></i>Points per 10,000 VND
                                     </th>
                                     <td class="font-weight-bold">
-                                        <?= number_format(($rules['points_per_order'] ?? 0.1) * 10000, 0) ?> điểm
+                                        <?= number_format(($rules['points_per_order'] ?? 0.1) * 10000, 0) ?> points
                                     </td>
                                 </tr>
                                 <tr>
                                     <th>
-                                        <i class="fas fa-calendar-alt mr-2 text-info"></i>Thời gian reset điểm
+                                        <i class="fas fa-calendar-alt mr-2 text-info"></i>Points Reset Period
                                     </th>
                                     <td class="font-weight-bold">
-                                        <?= $rules['reset_period_months'] ?? 12 ?> tháng
+                                        <?= $rules['reset_period_months'] ?? 12 ?> months
                                     </td>
                                 </tr>
                                 <tr>
                                     <th>
-                                        <i class="fas fa-percentage mr-2 text-success"></i>Ngưỡng duy trì hạng
+                                        <i class="fas fa-percentage mr-2 text-success"></i>Tier Retention Threshold
                                     </th>
                                     <td class="font-weight-bold">
-                                        <?= $rules['retention_threshold_percent'] ?? 30 ?>% điểm tối đa của mức hạng
+                                        <?= $rules['retention_threshold_percent'] ?? 30 ?>% of tier's maximum points
                                     </td>
                                 </tr>
                             </tbody>
@@ -355,35 +355,35 @@ require "../layouts/header.php";
         </div>
     </div>
 
-    <!-- Bảng thông tin các mức hạng -->
+    <!-- Membership Tiers Information Table -->
     <div class="row">
         <div class="col-12">
             <div class="card shadow">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-trophy mr-2"></i>Mức hạng thành viên
+                        <i class="fas fa-trophy mr-2"></i>Membership Tiers
                     </h6>
                     <a href="tier-settings.php" class="btn btn-sm btn-primary">
-                        <i class="fas fa-edit"></i> Chỉnh sửa
+                        <i class="fas fa-edit"></i> Edit
                     </a>
                 </div>
                 <div class="card-body">
                     <?php if (empty($tiers)): ?>
                         <div class="alert alert-info">
                             <i class="fas fa-info-circle mr-2"></i>
-                            Chưa có mức hạng nào được cấu hình.
-                            <a href="tier-settings.php" class="alert-link">Nhấn vào đây để cấu hình</a>.
+                            No membership tiers have been configured yet.
+                            <a href="tier-settings.php" class="alert-link">Click here to configure</a>.
                         </div>
                     <?php else: ?>
                         <div class="table-responsive">
                             <table class="table table-bordered table-hover">
                                 <thead class="thead-light">
                                     <tr>
-                                        <th><i class="fas fa-tag mr-1"></i>Tên mức hạng</th>
-                                        <th><i class="fas fa-star mr-1"></i>Điểm tích lũy</th>
-                                        <th><i class="fas fa-percentage mr-1"></i>Giảm giá</th>
-                                        <th><i class="fas fa-toggle-on mr-1"></i>Trạng thái</th>
-                                        <th><i class="fas fa-users mr-1"></i>Số thành viên</th>
+                                        <th><i class="fas fa-tag mr-1"></i>Tier Name</th>
+                                        <th><i class="fas fa-star mr-1"></i>Points Required</th>
+                                        <th><i class="fas fa-percentage mr-1"></i>Discount</th>
+                                        <th><i class="fas fa-toggle-on mr-1"></i>Status</th>
+                                        <th><i class="fas fa-users mr-1"></i>Members</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -400,22 +400,22 @@ require "../layouts/header.php";
                                                 <?php if (isset($tier['max_points']) && $tier['max_points']): ?>
                                                     - <?= number_format($tier['max_points']) ?>
                                                 <?php else: ?>
-                                                    <span class="text-muted">trở lên</span>
+                                                    <span class="text-muted">and above</span>
                                                 <?php endif; ?>
                                             </td>
                                             <td>
-                                                <span class="badge badge-success">
+                                                <span class="badge badge-warning" style="background-color: #ffc107; color: #212529;">
                                                     <?= number_format($tier['discount_percent'], 1) ?>%
                                                 </span>
                                             </td>
                                             <td>
                                                 <?php if ($tier['status'] == 'active'): ?>
-                                                    <span class="badge badge-success">
-                                                        <i class="fas fa-check mr-1"></i>Đang hoạt động
+                                                    <span class="badge badge-success" style="background-color: #28a745; color: #fff;">
+                                                        <i class="fas fa-check mr-1"></i>Active
                                                     </span>
                                                 <?php else: ?>
-                                                    <span class="badge badge-secondary">
-                                                        <i class="fas fa-pause mr-1"></i>Không hoạt động
+                                                    <span class="badge badge-danger" style="background-color: #dc3545; color: #fff;">
+                                                        <i class="fas fa-pause mr-1"></i>Inactive
                                                     </span>
                                                 <?php endif; ?>
                                             </td>
@@ -423,7 +423,7 @@ require "../layouts/header.php";
                                                 <span class="font-weight-bold">
                                                     <?= number_format($stats['tiers'][$tier['tier_key']] ?? 0) ?>
                                                 </span>
-                                                <small class="text-muted">thành viên</small>
+                                                <small class="text-muted">members</small>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>

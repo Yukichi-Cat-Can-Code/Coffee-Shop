@@ -1,19 +1,20 @@
 <?php
+// filepath: c:\xampp\htdocs\Coffee-Shop\admin-panel\membership-admin\tier-settings.php
 require "../../config/config.php";
 requireAdminLogin();
 
-// Xử lý cập nhật mức hạng
+// Handle tier update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_tiers'])) {
     try {
         $conn->beginTransaction();
 
-        // Xử lý các mức hạng hiện tại
+        // Process existing tiers
         foreach ($_POST['tier'] as $id => $tier) {
-            // Kiểm tra cấu trúc bảng trước khi update
+            // Check table structure before update
             $checkColumns = $conn->query("DESCRIBE membership_tiers")->fetchAll(PDO::FETCH_COLUMN);
 
             if (in_array('max_points', $checkColumns)) {
-                // Nếu có cột max_points
+                // If max_points column exists
                 $stmt = $conn->prepare("
                     UPDATE membership_tiers
                     SET tier_name = :name,
@@ -27,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_tiers'])) {
                 $maxPoints = !empty($tier['max_points']) ? $tier['max_points'] : null;
                 $stmt->bindParam(':max_points', $maxPoints, PDO::PARAM_INT);
             } else {
-                // Nếu không có cột max_points
+                // If max_points column doesn't exist
                 $stmt = $conn->prepare("
                     UPDATE membership_tiers
                     SET tier_name = :name,
@@ -46,18 +47,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_tiers'])) {
             $stmt->execute();
         }
 
-        // Thêm mới mức hạng nếu có
+        // Add new tier if provided
         if (!empty($_POST['new_tier']['name'])) {
             $newTier = $_POST['new_tier'];
             $tierKey = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $newTier['name']));
             $icon = !empty($newTier['icon']) ? $newTier['icon'] : 'fas fa-medal';
             $color = !empty($newTier['color']) ? $newTier['color'] : '#6c757d';
 
-            // Kiểm tra xem có cột tier_code hay tier_key
+            // Check if tier_code or tier_key column exists
             $checkColumns = $conn->query("DESCRIBE membership_tiers")->fetchAll(PDO::FETCH_COLUMN);
 
             if (in_array('max_points', $checkColumns)) {
-                // Có cột max_points
+                // Has max_points column
                 if (in_array('tier_code', $checkColumns)) {
                     $stmt = $conn->prepare("
                         INSERT INTO membership_tiers 
@@ -75,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_tiers'])) {
                 $maxPoints = !empty($newTier['max_points']) ? $newTier['max_points'] : null;
                 $stmt->bindParam(':max_points', $maxPoints, PDO::PARAM_INT);
             } else {
-                // Không có cột max_points
+                // No max_points column
                 if (in_array('tier_code', $checkColumns)) {
                     $stmt = $conn->prepare("
                         INSERT INTO membership_tiers 
@@ -102,23 +103,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_tiers'])) {
         }
 
         $conn->commit();
-        $successMessage = "Cập nhật mức hạng thành công!";
+        $successMessage = "Membership tiers updated successfully!";
     } catch (PDOException $e) {
         $conn->rollBack();
-        $errorMessage = "Lỗi: " . $e->getMessage();
+        $errorMessage = "Error: " . $e->getMessage();
     }
 }
 
-// Xử lý xóa mức hạng
+// Handle tier deletion
 if (isset($_POST['delete_tier'])) {
     try {
         $tierId = (int)$_POST['delete_tier'];
 
-        // Kiểm tra cấu trúc bảng để xác định tên cột
+        // Check table structure to determine column name
         $checkColumns = $conn->query("DESCRIBE membership_tiers")->fetchAll(PDO::FETCH_COLUMN);
         $tierCodeColumn = in_array('tier_code', $checkColumns) ? 'tier_code' : 'tier_key';
 
-        // Kiểm tra xem có thành viên đang sử dụng mức hạng này không
+        // Check if any members are using this tier
         $checkStmt = $conn->prepare("
             SELECT {$tierCodeColumn} FROM membership_tiers WHERE id = :id
         ");
@@ -136,33 +137,33 @@ if (isset($_POST['delete_tier'])) {
             $memberCount = $countStmt->fetch(PDO::FETCH_ASSOC)['count'];
 
             if ($memberCount > 0) {
-                $errorMessage = "Không thể xóa mức hạng này vì có {$memberCount} thành viên đang sử dụng!";
+                $errorMessage = "Cannot delete this tier because {$memberCount} members are currently using it!";
             } else {
                 $deleteStmt = $conn->prepare("DELETE FROM membership_tiers WHERE id = :id");
                 $deleteStmt->bindParam(':id', $tierId, PDO::PARAM_INT);
                 $deleteStmt->execute();
-                $successMessage = "Đã xóa mức hạng thành công!";
+                $successMessage = "Membership tier deleted successfully!";
             }
         } else {
-            $errorMessage = "Không tìm thấy mức hạng để xóa!";
+            $errorMessage = "Tier not found for deletion!";
         }
     } catch (PDOException $e) {
-        $errorMessage = "Lỗi: " . $e->getMessage();
+        $errorMessage = "Error: " . $e->getMessage();
     }
 }
 
-// Lấy danh sách các mức hạng
+// Get list of tiers
 try {
     $stmt = $conn->query("SELECT * FROM membership_tiers ORDER BY min_points ASC");
     $tiers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Kiểm tra cấu trúc bảng để biết có cột max_points không
+    // Check table structure to know if max_points column exists
     $checkColumns = $conn->query("DESCRIBE membership_tiers")->fetchAll(PDO::FETCH_COLUMN);
     $hasMaxPoints = in_array('max_points', $checkColumns);
 } catch (PDOException $e) {
     $tiers = [];
     $hasMaxPoints = false;
-    $errorMessage = "Lỗi khi tải dữ liệu: " . $e->getMessage();
+    $errorMessage = "Error loading data: " . $e->getMessage();
 }
 
 require "../layouts/header.php";
@@ -171,10 +172,10 @@ require "../layouts/header.php";
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0 text-gray-800">
-            <i class="fas fa-medal mr-2"></i>Cài đặt mức hạng thành viên
+            <i class="fas fa-medal mr-2"></i>Membership Tier Settings
         </h1>
         <a href="index.php" class="btn btn-secondary">
-            <i class="fas fa-arrow-left mr-1"></i> Quay lại Dashboard
+            <i class="fas fa-arrow-left mr-1"></i> Back to Dashboard
         </a>
     </div>
 
@@ -199,7 +200,7 @@ require "../layouts/header.php";
     <div class="card shadow mb-4">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">
-                <i class="fas fa-cog mr-2"></i>Cấu hình mức hạng
+                <i class="fas fa-cog mr-2"></i>Tier Configuration
             </h6>
         </div>
         <div class="card-body">
@@ -208,14 +209,14 @@ require "../layouts/header.php";
                     <table class="table table-bordered table-hover" id="tierTable">
                         <thead class="thead-light">
                             <tr>
-                                <th width="20%">Tên mức hạng</th>
-                                <th width="15%">Điểm tối thiểu</th>
+                                <th width="20%">Tier Name</th>
+                                <th width="15%">Minimum Points</th>
                                 <?php if ($hasMaxPoints): ?>
-                                    <th width="15%">Điểm tối đa</th>
+                                    <th width="15%">Maximum Points</th>
                                 <?php endif; ?>
-                                <th width="15%">Giảm giá (%)</th>
-                                <th width="15%">Trạng thái</th>
-                                <th width="20%">Thao tác</th>
+                                <th width="15%">Discount (%)</th>
+                                <th width="15%">Status</th>
+                                <th width="20%">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -245,8 +246,8 @@ require "../layouts/header.php";
                                                 name="tier[<?= $tier['id'] ?>][max_points]"
                                                 value="<?= $tier['max_points'] ?? '' ?>"
                                                 min="0" step="1"
-                                                placeholder="Không giới hạn">
-                                            <small class="form-text text-muted">Để trống = không giới hạn</small>
+                                                placeholder="No limit">
+                                            <small class="form-text text-muted">Leave empty = no limit</small>
                                         </td>
                                     <?php endif; ?>
                                     <td>
@@ -263,10 +264,10 @@ require "../layouts/header.php";
                                     <td>
                                         <select class="form-control" name="tier[<?= $tier['id'] ?>][status]">
                                             <option value="active" <?= $tier['status'] === 'active' ? 'selected' : '' ?>>
-                                                Hoạt động
+                                                Active
                                             </option>
                                             <option value="inactive" <?= $tier['status'] === 'inactive' ? 'selected' : '' ?>>
-                                                Không hoạt động
+                                                Inactive
                                             </option>
                                         </select>
                                     </td>
@@ -275,36 +276,36 @@ require "../layouts/header.php";
                                             data-toggle="modal" data-target="#deleteTierModal"
                                             data-tier-id="<?= $tier['id'] ?>"
                                             data-tier-name="<?= htmlspecialchars($tier['tier_name']) ?>">
-                                            <i class="fas fa-trash-alt"></i> Xóa
+                                            <i class="fas fa-trash-alt"></i> Delete
                                         </button>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
 
-                            <!-- Thêm mức hạng mới -->
+                            <!-- Add new tier -->
                             <tr class="table-light">
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <i class="fas fa-plus-circle text-success mr-2"></i>
                                         <input type="text" class="form-control"
-                                            name="new_tier[name]" placeholder="Tên mức hạng mới">
+                                            name="new_tier[name]" placeholder="New tier name">
                                     </div>
                                 </td>
                                 <td>
                                     <input type="number" class="form-control"
-                                        name="new_tier[min_points]" min="0" step="1" placeholder="Điểm tối thiểu">
+                                        name="new_tier[min_points]" min="0" step="1" placeholder="Minimum points">
                                 </td>
                                 <?php if ($hasMaxPoints): ?>
                                     <td>
                                         <input type="number" class="form-control"
-                                            name="new_tier[max_points]" min="0" step="1" placeholder="Điểm tối đa">
-                                        <small class="form-text text-muted">Để trống = không giới hạn</small>
+                                            name="new_tier[max_points]" min="0" step="1" placeholder="Maximum points">
+                                        <small class="form-text text-muted">Leave empty = no limit</small>
                                     </td>
                                 <?php endif; ?>
                                 <td>
                                     <div class="input-group">
                                         <input type="number" class="form-control"
-                                            name="new_tier[discount]" min="0" max="100" step="0.1" placeholder="% giảm giá">
+                                            name="new_tier[discount]" min="0" max="100" step="0.1" placeholder="% discount">
                                         <div class="input-group-append">
                                             <span class="input-group-text">%</span>
                                         </div>
@@ -312,13 +313,13 @@ require "../layouts/header.php";
                                 </td>
                                 <td>
                                     <select class="form-control" name="new_tier[status]">
-                                        <option value="active">Hoạt động</option>
-                                        <option value="inactive">Không hoạt động</option>
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
                                     </select>
                                 </td>
                                 <td>
                                     <span class="badge badge-info">
-                                        <i class="fas fa-plus mr-1"></i>Mức hạng mới
+                                        <i class="fas fa-plus mr-1"></i>New Tier
                                     </span>
                                 </td>
                             </tr>
@@ -328,51 +329,51 @@ require "../layouts/header.php";
 
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle mr-2"></i>
-                    <strong>Lưu ý:</strong>
+                    <strong>Important Notes:</strong>
                     <ul class="mb-0 mt-2">
-                        <li>Mỗi mức hạng cần có điểm tối thiểu khác nhau</li>
-                        <li>Khi có sự chồng chéo điểm, hệ thống sẽ ưu tiên mức hạng có điểm tối thiểu cao nhất</li>
-                        <li>Điểm tối đa có thể để trống để biểu thị "không giới hạn"</li>
-                        <li>Phần trăm giảm giá từ 0% đến 100%</li>
+                        <li>Each tier must have different minimum points</li>
+                        <li>When points overlap, the system will prioritize the tier with the highest minimum points</li>
+                        <li>Maximum points can be left empty to indicate "no limit"</li>
+                        <li>Discount percentage ranges from 0% to 100%</li>
                     </ul>
                 </div>
 
                 <div class="text-center">
                     <button type="submit" name="save_tiers" class="btn btn-success btn-lg">
-                        <i class="fas fa-save mr-2"></i> Lưu thay đổi
+                        <i class="fas fa-save mr-2"></i> Save Changes
                     </button>
                     <a href="index.php" class="btn btn-secondary btn-lg ml-2">
-                        <i class="fas fa-times mr-2"></i> Hủy
+                        <i class="fas fa-times mr-2"></i> Cancel
                     </a>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Thêm ghi chú hướng dẫn -->
+    <!-- User Guide -->
     <div class="card shadow">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-info">
-                <i class="fas fa-question-circle mr-2"></i>Hướng dẫn sử dụng
+                <i class="fas fa-question-circle mr-2"></i>User Guide
             </h6>
         </div>
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6">
-                    <h6 class="text-primary">Cách thiết lập mức hạng:</h6>
+                    <h6 class="text-primary">How to Setup Tiers:</h6>
                     <ol>
-                        <li>Điền tên mức hạng (VD: Đồng, Bạc, Vàng)</li>
-                        <li>Đặt điểm tối thiểu để đạt mức hạng đó</li>
-                        <li>Thiết lập phần trăm giảm giá cho mức hạng</li>
-                        <li>Chọn trạng thái hoạt động/không hoạt động</li>
+                        <li>Enter tier name (e.g., Bronze, Silver, Gold)</li>
+                        <li>Set minimum points required to reach that tier</li>
+                        <li>Configure discount percentage for the tier</li>
+                        <li>Choose active/inactive status</li>
                     </ol>
                 </div>
                 <div class="col-md-6">
-                    <h6 class="text-primary">Ví dụ mức hạng:</h6>
+                    <h6 class="text-primary">Example Tier Setup:</h6>
                     <ul>
-                        <li><strong>Đồng:</strong> 0 - 199 điểm (Giảm 5%)</li>
-                        <li><strong>Bạc:</strong> 200 - 499 điểm (Giảm 10%)</li>
-                        <li><strong>Vàng:</strong> 500+ điểm (Giảm 15%)</li>
+                        <li><strong>Bronze:</strong> 0 - 199 points (5% discount)</li>
+                        <li><strong>Silver:</strong> 200 - 499 points (10% discount)</li>
+                        <li><strong>Gold:</strong> 500+ points (15% discount)</li>
                     </ul>
                 </div>
             </div>
@@ -380,33 +381,33 @@ require "../layouts/header.php";
     </div>
 </div>
 
-<!-- Modal Xác nhận xóa mức hạng -->
+<!-- Delete Tier Confirmation Modal -->
 <div class="modal fade" id="deleteTierModal" tabindex="-1" role="dialog" aria-labelledby="deleteTierModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header bg-danger text-white">
                 <h5 class="modal-title" id="deleteTierModalLabel">
-                    <i class="fas fa-exclamation-triangle mr-2"></i>Xác nhận xóa
+                    <i class="fas fa-exclamation-triangle mr-2"></i>Confirm Deletion
                 </h5>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <p>Bạn có chắc chắn muốn xóa mức hạng <span id="tierNameToDelete" class="font-weight-bold text-danger"></span>?</p>
+                <p>Are you sure you want to delete the tier <span id="tierNameToDelete" class="font-weight-bold text-danger"></span>?</p>
                 <div class="alert alert-warning">
                     <i class="fas fa-warning mr-1"></i>
-                    <strong>Cảnh báo:</strong> Hành động này không thể hoàn tác!
+                    <strong>Warning:</strong> This action cannot be undone!
                 </div>
             </div>
             <div class="modal-footer">
                 <form method="POST" action="">
                     <input type="hidden" name="delete_tier" id="tierIdToDelete">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                        <i class="fas fa-times mr-1"></i>Hủy
+                        <i class="fas fa-times mr-1"></i>Cancel
                     </button>
                     <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-trash mr-1"></i>Xác nhận xóa
+                        <i class="fas fa-trash mr-1"></i>Confirm Delete
                     </button>
                 </form>
             </div>
@@ -416,7 +417,7 @@ require "../layouts/header.php";
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Thiết lập dữ liệu cho modal xóa
+        // Setup data for delete modal
         const deleteTierBtns = document.querySelectorAll('.delete-tier-btn');
         deleteTierBtns.forEach(btn => {
             btn.addEventListener('click', function() {
@@ -428,7 +429,7 @@ require "../layouts/header.php";
             });
         });
 
-        // Validation cho form
+        // Form validation
         const form = document.querySelector('form');
         form.addEventListener('submit', function(e) {
             const minPointInputs = document.querySelectorAll('input[name*="[min_points]"]');
@@ -440,11 +441,11 @@ require "../layouts/header.php";
                 }
             });
 
-            // Kiểm tra trùng lặp điểm tối thiểu
+            // Check for duplicate minimum points
             const duplicates = minPoints.filter((item, index) => minPoints.indexOf(item) !== index);
             if (duplicates.length > 0) {
                 e.preventDefault();
-                alert('Có điểm tối thiểu bị trùng lặp. Vui lòng kiểm tra lại!');
+                alert('Duplicate minimum points found. Please check again!');
                 return false;
             }
         });
