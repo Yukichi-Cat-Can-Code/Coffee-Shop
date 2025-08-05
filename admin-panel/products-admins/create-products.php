@@ -66,11 +66,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
       ]);
 
       if ($insert_result) {
-        session()->setFlash('product_message', "Đã thêm sản phẩm mới thành công");
-        session()->setFlash('product_message_type', "success");
-        redirect(ADMINAPPURL . "/products-admins/show-products.php");
-        exit;
-      } else {
+  $user_id = session()->get('admin_id'); // giả sử bạn lưu id admin trong session
+  $desc = "Product added: {$product_title} (Price: {$product_price}đ, type: {$product_type})";
+
+  require_once "../admins/audit.php"; // nếu chưa include
+  logAudit($conn, $user_id, 'create_product', $desc);
+
+  session()->setFlash('product_message', "Đã thêm sản phẩm mới thành công");
+  session()->setFlash('product_message_type', "success");
+  redirect(ADMINAPPURL . "/products-admins/show-products.php");
+  exit;
+} else {
         $error_message = "Không thể thêm sản phẩm";
       }
     } catch (PDOException $e) {

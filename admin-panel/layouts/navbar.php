@@ -31,7 +31,10 @@
                             <i class="fas fa-store me-1"></i>Store
                         </a>
                     </li>
-
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?php echo ADMINAPPURL ?>/admins/audit-log.php">
+                            <i class="fas fa-history me-1"></i>Audit Log
+                        </a>
                     <li class="nav-item dropdown user-dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button"
                             data-bs-toggle="dropdown" aria-expanded="false">

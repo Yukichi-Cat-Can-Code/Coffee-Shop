@@ -109,9 +109,7 @@ function exportToPDF($data)
   </style>
 
   <div class='header'>";
-  if ($logoPath) {
-    $html .= "<img src='{$logoPath}' alt='Logo' style='height: 50px; margin-right: 15px;'/>";
-  }
+
   $html .= "<h2>Revenue Report</h2>
   </div>
 
@@ -187,7 +185,7 @@ require "../layouts/header.php";
   <!-- Revenue Chart -->
   <div class="card shadow">
     <div class="card-body">
-      <h5 class="card-title mb-3">POS Revenue Chart</h5>
+      <h5 class="card-title mb-3"> Revenue Chart</h5>
       <canvas id="salesChart" height="100"></canvas>
     </div>
   </div>
