@@ -383,16 +383,17 @@ echo '<style>
                                     </td>
                                     <td>
                                         <a href="member-detail.php?id=<?= $member['ID'] ?>" class="btn btn-sm btn-info" title="View Details">
-                                            <i class="fas fa-eye"></i>
+                                            <!-- <i class="fas fa-eye"></i> -->
+                                            <i class="fas fa-edit"></i>
                                         </a>
-                                        <button type="button" class="btn btn-sm btn-primary edit-points-btn"
+                                        <!-- <button type="button" class="btn btn-sm btn-primary edit-points-btn"
                                             data-toggle="modal" data-target="#editPointsModal"
                                             data-id="<?= $member['ID'] ?>"
                                             data-name="<?= htmlspecialchars($member['user_name']) ?>"
                                             data-points="<?= $member['membership_points'] ?>"
                                             title="Edit Points">
                                             <i class="fas fa-edit"></i>
-                                        </button>
+                                        </button> -->
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

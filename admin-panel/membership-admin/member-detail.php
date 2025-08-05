@@ -1,5 +1,5 @@
 <?php
-
+// filepath: c:\xampp\htdocs\Coffee-Shop\admin-panel\membership-admin\member-detail.php
 require "../../config/config.php";
 requireAdminLogin();
 
@@ -102,6 +102,7 @@ function getStatusBadgeClass($status)
 {
     switch (strtolower($status)) {
         case 'completed':
+        case 'delivered':
         case 'đã hoàn thành':
         case 'đã thanh toán':
             return 'success';
@@ -130,6 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         if ($action === 'adjust_points') {
+            $pointAction = $_POST['point_action'] ?? 'add';
             $points = (int)$_POST['points'];
             $notes = trim($_POST['notes']);
 
@@ -144,8 +146,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $currentPoints = $currentPointsStmt->fetch(PDO::FETCH_ASSOC)['membership_points'];
 
-            // Update points
-            $newPoints = $currentPoints + $points;
+            // Calculate new points based on action
+            if ($pointAction === 'set') {
+                $newPoints = $points;
+                $pointsChange = $points - $currentPoints;
+            } elseif ($pointAction === 'subtract') {
+                $pointsChange = -abs($points);
+                $newPoints = $currentPoints + $pointsChange;
+            } else { // add
+                $pointsChange = abs($points);
+                $newPoints = $currentPoints + $pointsChange;
+            }
+
             if ($newPoints < 0) $newPoints = 0;
 
             $conn->beginTransaction();
@@ -161,9 +173,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 INSERT INTO membership_point_history (user_id, points, action, notes) 
                 VALUES (:user_id, :points, :action, :notes)
             ");
-            $actionType = $points >= 0 ? 'earned' : 'used';
+            $actionType = $pointsChange >= 0 ? 'earned' : 'used';
+            if ($pointAction === 'set') $actionType = 'adjusted';
+
             $historyStmt->bindParam(':user_id', $memberId, PDO::PARAM_INT);
-            $historyStmt->bindParam(':points', $points, PDO::PARAM_INT);
+            $historyStmt->bindParam(':points', $pointsChange, PDO::PARAM_INT);
             $historyStmt->bindParam(':action', $actionType, PDO::PARAM_STR);
             $historyStmt->bindParam(':notes', $notes, PDO::PARAM_STR);
             $historyStmt->execute();
@@ -172,14 +186,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             updateMembershipTier($conn, $memberId, $newPoints);
 
             $conn->commit();
-            $successMessage = "Point update successful.";
+            $successMessage = "Point adjustment successful.";
         } elseif ($action === 'change_tier') {
             $newTier = $_POST['tier'];
-            $notes = "Changed membership tier manually to: " . $newTier;
+            $notes = "Manually changed membership tier to: " . $newTier;
 
             $updateStmt = $conn->prepare("
                 UPDATE users 
-                SET membership_tier = :tier, last_tier_update = CURRENT_DATE 
+                SET membership_tier = :tier, tier_updated_at = CURRENT_TIMESTAMP 
                 WHERE ID = :id
             ");
             $updateStmt->bindParam(':tier', $newTier, PDO::PARAM_STR);
@@ -199,29 +213,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Auto update membership tier based on points
 function updateMembershipTier($conn, $userId, $points)
 {
-    // Get tier level based on points
-    $stmt = $conn->prepare("
-        SELECT tier_key
-        FROM membership_tiers 
-        WHERE status = 'active' AND min_points <= :points
-        ORDER BY min_points DESC
-        LIMIT 1
-    ");
-    $stmt->bindParam(':points', $points, PDO::PARAM_INT);
-    $stmt->execute();
-
-    if ($stmt->rowCount() > 0) {
-        $tier = $stmt->fetch(PDO::FETCH_ASSOC)['tier_key'];
-
-        // Update new tier
-        $updateStmt = $conn->prepare("
-            UPDATE users 
-            SET membership_tier = :tier, last_tier_update = CURRENT_DATE
-            WHERE ID = :id
+    try {
+        // Get tier level based on points
+        $stmt = $conn->prepare("
+            SELECT tier_key
+            FROM membership_tiers 
+            WHERE status = 'active' AND min_points <= :points
+            ORDER BY min_points DESC
+            LIMIT 1
         ");
-        $updateStmt->bindParam(':tier', $tier, PDO::PARAM_STR);
-        $updateStmt->bindParam(':id', $userId, PDO::PARAM_INT);
-        $updateStmt->execute();
+        $stmt->bindParam(':points', $points, PDO::PARAM_INT);
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+            $tier = $stmt->fetch(PDO::FETCH_ASSOC)['tier_key'];
+
+            // Update new tier
+            $updateStmt = $conn->prepare("
+                UPDATE users 
+                SET membership_tier = :tier, tier_updated_at = CURRENT_TIMESTAMP
+                WHERE ID = :id
+            ");
+            $updateStmt->bindParam(':tier', $tier, PDO::PARAM_STR);
+            $updateStmt->bindParam(':id', $userId, PDO::PARAM_INT);
+            $updateStmt->execute();
+        }
+    } catch (Exception $e) {
+        error_log('Error updating membership tier: ' . $e->getMessage());
     }
 }
 
@@ -329,6 +347,10 @@ require "../layouts/header.php";
     .bg-gradient-secondary {
         background: linear-gradient(87deg, #8898aa 0, #888aaa 100%);
     }
+
+    .bg-gradient-dark {
+        background: linear-gradient(87deg, #32383e 0, #484e55 100%);
+    }
 </style>
 
 <div class="container-fluid py-4">
@@ -402,7 +424,7 @@ require "../layouts/header.php";
                         <div class="d-flex justify-content-between">
                             <span>Last Tier Update:</span>
                             <span class="font-weight-bold">
-                                <?= !empty($member['last_tier_update']) ? date('d/m/Y', strtotime($member['last_tier_update'])) : 'N/A' ?>
+                                <?= !empty($member['tier_updated_at']) ? date('d/m/Y', strtotime($member['tier_updated_at'])) : 'N/A' ?>
                             </span>
                         </div>
                     </div>
@@ -470,7 +492,7 @@ require "../layouts/header.php";
                                 <div class="form-group">
                                     <label for="tier">Select new tier:</label>
                                     <select name="tier" id="tier" class="form-control">
-                                        <option value="">-- No tier --</option>
+                                        <option value="none">-- No tier --</option>
                                         <?php foreach ($tiers as $tier): ?>
                                             <option value="<?= $tier['tier_key'] ?>"
                                                 <?= ($member['membership_tier'] == $tier['tier_key']) ? 'selected' : '' ?>>
@@ -504,7 +526,7 @@ require "../layouts/header.php";
                             <label for="points">Adjust points:</label>
                             <div class="input-group">
                                 <div class="input-group-prepend">
-                                    <select class="form-control" id="point-action">
+                                    <select class="form-control" name="point_action" id="point-action">
                                         <option value="add">Add (+)</option>
                                         <option value="subtract">Subtract (-)</option>
                                         <option value="set">Set</option>
@@ -644,34 +666,15 @@ require "../layouts/header.php";
             switch (this.value) {
                 case 'add':
                     pointsHelp.textContent = 'Add points to member account.';
-                    pointsInput.name = 'points';
                     break;
                 case 'subtract':
                     pointsHelp.textContent = 'Subtract points from member account.';
-                    pointsInput.name = 'points';
                     break;
                 case 'set':
                     pointsHelp.textContent = 'Set total points for this member.';
-                    pointsInput.name = 'set_points';
                     break;
             }
         });
-
-        // Submit form handler
-        const form = document.querySelector('form[action=""]');
-        if (form && form.querySelector('input[name="action"][value="adjust_points"]')) {
-            form.addEventListener('submit', function(e) {
-                const pointAction = pointActionSelect.value;
-                const pointsValue = parseInt(pointsInput.value);
-
-                if (pointAction === 'subtract') {
-                    // Convert value to negative when subtracting points
-                    pointsInput.value = -Math.abs(pointsValue);
-                }
-
-                // Form will submit normally
-            });
-        }
     });
 </script>
 

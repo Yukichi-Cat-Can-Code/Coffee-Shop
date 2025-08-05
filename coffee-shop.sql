@@ -538,7 +538,34 @@ UPDATE users SET membership_tier = 'none' WHERE membership_tier IS NULL OR membe
 -- Bật lại foreign key checks
 SET FOREIGN_KEY_CHECKS = 1;
 
-DESCRIBE users;
+-- Tạo bảng lịch sử điểm thành viên
+CREATE TABLE IF NOT EXISTS `membership_point_history` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `points` int(11) NOT NULL,
+  `action` varchar(50) NOT NULL DEFAULT 'earned',
+  `notes` text DEFAULT NULL,
+  `order_id` int(11) DEFAULT NULL,
+  `admin_id` int(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `order_id` (`order_id`),
+  KEY `admin_id` (`admin_id`),
+  CONSTRAINT `fk_membership_point_history_user_id`
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_membership_point_history_order_id`
+    FOREIGN KEY (`order_id`) REFERENCES `orders` (`ID`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `fk_membership_point_history_admin_id`
+    FOREIGN KEY (`admin_id`) REFERENCES `admins` (`ID`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=UTF8MB4_GENERAL_CI;
+
+-- Thêm dữ liệu mẫu vào bảng lịch sử điểm
+INSERT INTO `membership_point_history` (`user_id`, `points`, `action`, `notes`) VALUES
+(1, 150, 'earned', 'Initial membership points from orders'),
+(2, 180, 'earned', 'Points earned from recent purchases'),
+(3, 320, 'earned', 'Accumulated points from multiple orders'),
+(8, 520, 'earned', 'High-value customer bonus points');
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
