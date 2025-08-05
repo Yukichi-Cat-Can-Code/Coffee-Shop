@@ -36,6 +36,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_id'])) {
 
         $conn->commit();
 
+        require_once "../admins/audit.php";
+        logAudit($conn, session()->get('admin_id'), 'delete_admin', "Delete an admin account with ID: $admin_id ");
+
         session()->setFlash('admin_message', "Đã xóa quản trị viên \"" . htmlspecialchars($admin['admin_name']) . "\" thành công");
         session()->setFlash('admin_message_type', "success");
     } catch (Exception $e) {

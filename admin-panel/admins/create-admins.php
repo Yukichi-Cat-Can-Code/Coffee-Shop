@@ -45,6 +45,9 @@ if (isset($_POST['submit'])) {
         ":admin_password" => $admin_password,
       ]);
 
+
+      require_once "../admins/audit.php";
+      logAudit($conn, session()->get('admin_id'), 'create_admin', "Creat a new admin account: $admin_name ($admin_email)");
       // Lưu thông báo thành công vào session
       session()->setFlash('admin_message', "Tài khoản quản trị viên \"{$admin_name}\" đã được tạo thành công!");
       session()->setFlash('admin_message_type', "success");

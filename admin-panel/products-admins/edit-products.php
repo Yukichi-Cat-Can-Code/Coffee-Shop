@@ -102,6 +102,9 @@ if (isset($_GET['product_id']) && is_numeric($_GET['product_id'])) {
                         }
                     }
 
+                    require_once "../admins/audit.php"; // nếu chưa include
+                    logAudit($conn, session()->get('admin_id'), 'update_product', "Product updated #$product_id - $product_title");
+
                     session()->setFlash('product_message', "Cập nhật sản phẩm #$product_id thành công");
                     session()->setFlash('product_message_type', "success");
                     redirect(ADMINAPPURL . "/products-admins/show-products.php");

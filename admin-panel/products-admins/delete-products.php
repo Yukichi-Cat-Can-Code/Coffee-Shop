@@ -31,6 +31,11 @@ if (isset($_GET['product_id'])) {
             // Commit transaction nếu mọi thứ OK
             $conn->commit();
 
+            require_once "../admins/audit.php";
+
+            logAudit($conn, session()->get('admin_id'), 'delete_product', "Product deleted #$product_id - {$product->product_title}");
+
+
             session()->setFlash('product_message', "Đã xóa sản phẩm #" . $product_id . " thành công");
             session()->setFlash('product_message_type', "success");
         } else {
