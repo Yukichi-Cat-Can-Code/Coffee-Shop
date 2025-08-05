@@ -15,7 +15,7 @@ if (!$orderID) {
 // Định dạng tiền tệ
 function formatMoney($amount)
 {
-    return number_format($amount, 0, ',', '.') . ' đ';
+    return number_format($amount, 3, ',', '.') . ' đ';
 }
 
 // Định dạng ngày giờ

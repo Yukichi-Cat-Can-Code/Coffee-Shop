@@ -38,7 +38,7 @@ require "../layouts/header.php";
 // Format tiền tệ
 function formatMoney($amount)
 {
-    return number_format($amount, 0, ',', '.') . ' đ';
+    return number_format($amount, 3, ',', '.') . ' đ';
 }
 ?>
 

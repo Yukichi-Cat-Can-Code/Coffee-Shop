@@ -128,18 +128,18 @@ function processCustomerInfo($data)
 // Tính toán giá trị đơn hàng
 function calculateOrderValues($data)
 {
-    $subtotal = floatval($data['subtotal']);
+    $subtotal = round(floatval($data['subtotal']), 3);
     $discountPercent = floatval($data['discount'] ?? 0) / 100;
-    $discountAmount = $subtotal * $discountPercent;
-    $afterDiscount = $subtotal - $discountAmount;
-    $taxAmount = $afterDiscount * 0.1; // 10% VAT
-    $finalAmount = $afterDiscount + $taxAmount;
+    $discountAmount = round($subtotal * $discountPercent, 3);
+    $afterDiscount = round($subtotal - $discountAmount, 3);
+    $taxAmount = round($afterDiscount * 0.1, 3); // 10% VAT
+    $finalAmount = round($afterDiscount + $taxAmount, 3);
 
     return [
-        'subtotal' => $subtotal,
-        'discountAmount' => $discountAmount,
-        'taxAmount' => $taxAmount,
-        'finalAmount' => $finalAmount
+        'subtotal' => number_format($subtotal, 3, '.', ''),
+        'discountAmount' => number_format($discountAmount, 3, '.', ''),
+        'taxAmount' => number_format($taxAmount, 3, '.', ''),
+        'finalAmount' => number_format($finalAmount, 3, '.', '')
     ];
 }
 
@@ -193,6 +193,14 @@ function saveOrderItems($conn, $orderId, $items)
             continue;
         }
 
+        // Đảm bảo giá và tổng tiền có 3 chữ số thập phân
+        $price = round(floatval($item['price']), 3);
+        $itemSubtotal = round($price * $item['quantity'], 3);
+
+        // Chuyển về string với 3 chữ số thập phân
+        $price = number_format($price, 3, '.', '');
+        $itemSubtotal = number_format($itemSubtotal, 3, '.', '');
+
         // Kiểm tra từng item có size/customizations không
         $hasSize = checkTableHasColumn($conn, 'pos_order_items', 'size') && isset($item['size']) && $item['size'] !== null;
         $hasCustomizations = checkTableHasColumn($conn, 'pos_order_items', 'customizations') && isset($item['customizations']) && $item['customizations'] !== null;
@@ -220,7 +228,7 @@ function saveOrderItems($conn, $orderId, $items)
         $stmt->bindParam(':product_id', $item['id']);
         $stmt->bindParam(':product_name', $item['name']);
         $stmt->bindParam(':quantity', $item['quantity']);
-        $stmt->bindParam(':unit_price', $item['price'], PDO::PARAM_STR);
+        $stmt->bindParam(':unit_price', $price, PDO::PARAM_STR);
         $stmt->bindParam(':subtotal', $itemSubtotal, PDO::PARAM_STR);
 
         // Bind các tham số động

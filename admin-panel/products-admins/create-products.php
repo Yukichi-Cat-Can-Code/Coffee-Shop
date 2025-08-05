@@ -29,10 +29,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     $errors[] = "Vui lòng chọn loại sản phẩm";
   }
 
-  // Xử lý upload ảnh
-  $image_name = 'default-product.jpg'; // Ảnh mặc định nếu không upload
+  // // Xử lý upload ảnh
+  // $image_name = 'default-product.jpg'; // Ảnh mặc định nếu không upload
 
-  if (!empty($_FILES['image']['name'])) {
+  // if (!empty($_FILES['image']['name'])) {
+  //   $image = $_FILES['image']['name'];
+  //   $temp_image = $_FILES['image']['tmp_name'];
+  //   $image_ext = strtolower(pathinfo($image, PATHINFO_EXTENSION));
+  //   $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+  //   if (!in_array($image_ext, $allowed_extensions)) {
+  //     $errors[] = "Chỉ chấp nhận file ảnh (jpg, jpeg, png, gif, webp)";
+  //   } else {
+  //     // Tạo tên file duy nhất để tránh trùng lặp
+  //     $image_name = "product_" . time() . "_" . uniqid() . "." . $image_ext;
+  //     $upload_path = $_SERVER['DOCUMENT_ROOT'] . "/coffee-Shop/images/" . $image_name;
+
+  //     if (!move_uploaded_file($temp_image, $upload_path)) {
+  //       $errors[] = "Không thể upload ảnh. Vui lòng thử lại";
+  //     }
+  //   }
+  // }
+
+  // Xử lý upload ảnh
+  $image_name = ''; // Mặc định là rỗng để kiểm tra sau
+  $has_image = false;
+
+  // Kiểm tra nếu có ảnh được chọn từ thư viện
+  if (!empty($_POST['selected_image'])) {
+    $selected_image = trim($_POST['selected_image']);
+    // Kiểm tra xem file có tồn tại trong thư mục images
+    if (file_exists($_SERVER['DOCUMENT_ROOT'] . "/Coffee-Shop/images/" . $selected_image)) {
+      $image_name = $selected_image;
+      $has_image = true;
+    } else {
+      $errors[] = "Ảnh đã chọn không tồn tại trong thư viện";
+    }
+  }
+  // Nếu người dùng tải lên ảnh mới (ưu tiên cao hơn nếu cả hai được chọn)
+  else if (!empty($_FILES['image']['name'])) {
     $image = $_FILES['image']['name'];
     $temp_image = $_FILES['image']['tmp_name'];
     $image_ext = strtolower(pathinfo($image, PATHINFO_EXTENSION));
@@ -43,12 +78,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     } else {
       // Tạo tên file duy nhất để tránh trùng lặp
       $image_name = "product_" . time() . "_" . uniqid() . "." . $image_ext;
-      $upload_path = $_SERVER['DOCUMENT_ROOT'] . "/coffee-Shop/images/" . $image_name;
+      $upload_path = $_SERVER['DOCUMENT_ROOT'] . "/Coffee-Shop/images/" . $image_name;
 
-      if (!move_uploaded_file($temp_image, $upload_path)) {
+      if (move_uploaded_file($temp_image, $upload_path)) {
+        $has_image = true;
+      } else {
         $errors[] = "Không thể upload ảnh. Vui lòng thử lại";
       }
     }
+  }
+
+  // Kiểm tra xem có ảnh được chọn hoặc tải lên hay không
+  if (!$has_image) {
+    $errors[] = "Vui lòng chọn ảnh sản phẩm từ thư viện hoặc tải lên ảnh mới";
   }
 
   // Nếu không có lỗi, tiến hành tạo sản phẩm
@@ -134,7 +176,7 @@ require "../layouts/header.php";
                   <label for="price" class="form-label">Giá <span class="text-danger">*</span></label>
                   <div class="input-group">
                     <input type="number" class="form-control" id="price" name="price"
-                      value="<?= isset($product_price) ? $product_price : '' ?>" min="0" step="1" required>
+                      value="<?= isset($product_price) ? $product_price : '' ?>" min="0" step="0.01" required>
                     <span class="input-group-text">đ</span>
                   </div>
                 </div>
@@ -155,9 +197,10 @@ require "../layouts/header.php";
                 </div>
               </div>
 
+              <!-- Thêm tab cho phép chọn giữa "Upload ảnh mới" và "Chọn ảnh có sẵn" -->
               <div class="col-md-4">
                 <div class="mb-3 text-center">
-                  <label for="image" class="form-label d-block">Hình ảnh sản phẩm</label>
+                  <label class="form-label d-block">Hình ảnh sản phẩm</label>
                   <div class="image-preview mb-3">
                     <img src="<?= ADMINAPPURL ?>/../images/default-product.jpg"
                       class="img-fluid rounded shadow-sm"
@@ -166,11 +209,42 @@ require "../layouts/header.php";
                       alt="Xem trước hình ảnh sản phẩm">
                   </div>
 
-                  <div class="input-group mb-3">
-                    <input type="file" class="form-control" id="image" name="image" accept="image/*">
-                    <button class="btn btn-outline-secondary" type="button" id="resetImageBtn">Reset</button>
+                  <!-- Tab navigation -->
+                  <ul class="nav nav-tabs mb-3" role="tablist">
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link active" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload-panel"
+                        type="button" role="tab" aria-selected="true">Tải lên</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link" id="gallery-tab" data-bs-toggle="tab" data-bs-target="#gallery-panel"
+                        type="button" role="tab" aria-selected="false">Thư viện</button>
+                    </li>
+                  </ul>
+
+                  <!-- Tab content -->
+                  <div class="tab-content">
+                    <!-- Upload tab -->
+                    <div class="tab-pane fade show active" id="upload-panel" role="tabpanel">
+                      <div class="input-group mb-3">
+                        <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                        <button class="btn btn-outline-secondary" type="button" id="resetImageBtn">Reset</button>
+                      </div>
+                      <small class="text-muted">Tải lên ảnh từ máy tính của bạn</small>
+                    </div>
+
+                    <!-- Gallery tab -->
+                    <div class="tab-pane fade" id="gallery-panel" role="tabpanel">
+                      <input type="hidden" name="selected_image" id="selected_image" value="">
+                      <div class="image-gallery" id="imageGallery" style="max-height: 250px; overflow-y: auto;">
+                        <div class="text-center p-2">
+                          <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Đang tải...</span>
+                          </div>
+                        </div>
+                      </div>
+                      <small class="text-muted">Chọn ảnh có sẵn từ thư viện</small>
+                    </div>
                   </div>
-                  <small class="text-muted">Ảnh sản phẩm sẽ hiển thị trên trang web</small>
                 </div>
               </div>
             </div>
@@ -190,7 +264,7 @@ require "../layouts/header.php";
   </div>
 </div>
 
-<script>
+<!-- <script>
   document.addEventListener('DOMContentLoaded', function() {
     // Preview image before upload
     const imageInput = document.getElementById('image');
@@ -213,6 +287,105 @@ require "../layouts/header.php";
       imageInput.value = '';
       imagePreview.src = defaultImageSrc;
     });
+  });
+</script> -->
+
+<style>
+  .gallery-image {
+    border: 2px solid transparent;
+    transition: all 0.2s;
+  }
+
+  .gallery-image:hover {
+    transform: scale(1.05);
+  }
+
+  .gallery-image.selected {
+    border: 2px solid #28a745;
+  }
+</style>
+
+<!-- Thêm script để tải và hiển thị gallery ảnh -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Preview image before upload
+    const imageInput = document.getElementById('image');
+    const imagePreview = document.getElementById('imagePreview');
+    const resetImageBtn = document.getElementById('resetImageBtn');
+    const defaultImageSrc = imagePreview.src;
+    const selectedImageInput = document.getElementById('selected_image');
+    const galleryTab = document.getElementById('gallery-tab');
+
+    // Xử lý upload ảnh mới
+    imageInput.addEventListener('change', function() {
+      if (this.files && this.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          imagePreview.src = e.target.result;
+          selectedImageInput.value = ''; // Xóa ảnh đã chọn từ gallery
+        }
+        reader.readAsDataURL(this.files[0]);
+      }
+    });
+
+    // Reset image preview
+    resetImageBtn.addEventListener('click', function() {
+      imageInput.value = '';
+      imagePreview.src = defaultImageSrc;
+      selectedImageInput.value = '';
+    });
+
+    // Tải danh sách ảnh khi click vào tab gallery
+    galleryTab.addEventListener('click', loadImageGallery);
+
+    function loadImageGallery() {
+      const gallery = document.getElementById('imageGallery');
+
+      // Gửi AJAX request để lấy danh sách ảnh
+      fetch('get-images.php')
+        .then(response => response.json())
+        .then(images => {
+          let html = '';
+
+          if (images.length === 0) {
+            html = '<p class="text-center">Không có ảnh nào trong thư viện</p>';
+          } else {
+            html = '<div class="row g-2">';
+            images.forEach(image => {
+              html += `
+                        <div class="col-4 col-sm-3 mb-2">
+                            <div class="gallery-image" onclick="selectGalleryImage('${image.path}', '${image.name}')" 
+                                 data-image="${image.name}" style="cursor:pointer;">
+                                <img src="${image.path}" class="img-thumbnail" alt="${image.name}">
+                            </div>
+                        </div>`;
+            });
+            html += '</div>';
+          }
+
+          gallery.innerHTML = html;
+        })
+        .catch(error => {
+          gallery.innerHTML = '<p class="text-danger">Không thể tải thư viện ảnh</p>';
+          console.error('Error loading image gallery:', error);
+        });
+    }
+
+    // Định nghĩa hàm chọn ảnh từ gallery ở phạm vi global
+    window.selectGalleryImage = function(imagePath, imageName) {
+      imagePreview.src = imagePath;
+      selectedImageInput.value = imageName;
+      imageInput.value = ''; // Xóa file đã chọn từ input
+
+      // Đánh dấu ảnh được chọn
+      const galleryImages = document.querySelectorAll('.gallery-image');
+      galleryImages.forEach(img => {
+        img.classList.remove('selected');
+        if (img.dataset.image === imageName) {
+          img.classList.add('selected');
+        }
+      });
+    }
   });
 </script>
 
