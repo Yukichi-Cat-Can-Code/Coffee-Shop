@@ -1,5 +1,6 @@
 <?php
 require "../../config/config.php";
+
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
@@ -38,7 +39,8 @@ if ($action === 'pdf') {
 }
 
 // Export Excel
-function exportToExcel($data) {
+function exportToExcel($data)
+{
   header("Content-Type: application/vnd.ms-excel");
   header("Content-Disposition: attachment; filename=sales_report_" . date('Ymd') . ".xls");
 
@@ -65,25 +67,26 @@ function exportToExcel($data) {
 // Export PDF (dùng dompdf)
 
 
-function exportToPDF($data) {
- require __DIR__ . '/../../vendor/autoload.php';
+function exportToPDF($data)
+{
+  require __DIR__ . '/../../vendor/autoload.php';
 
-    $options = new Options();
-    $options->set('isHtml5ParserEnabled', true);
-    $options->set('defaultFont', 'DejaVu Sans');
-    $options->set('isRemoteEnabled', true);
+  $options = new Options();
+  $options->set('isHtml5ParserEnabled', true);
+  $options->set('defaultFont', 'DejaVu Sans');
+  $options->set('isRemoteEnabled', true);
 
-    $dompdf = new Dompdf($options);
+  $dompdf = new Dompdf($options);
 
-    $total = 0;
-    $today = date("Y-m-d H:i:s");
+  $total = 0;
+  $today = date("Y-m-d H:i:s");
 
-    $logoPath = realpath(__DIR__ . '/logo.png');
-    if ($logoPath && file_exists($logoPath)) {
-        $logoPath = 'file://' . $logoPath;
-    } else {
-        $logoPath = '';
-    }
+  $logoPath = realpath(__DIR__ . '/logo.png');
+  if ($logoPath && file_exists($logoPath)) {
+    $logoPath = 'file://' . $logoPath;
+  } else {
+    $logoPath = '';
+  }
 
   $html = "
   <style>
@@ -107,7 +110,7 @@ function exportToPDF($data) {
 
   <div class='header'>";
   if ($logoPath) {
-        $html .= "<img src='{$logoPath}' alt='Logo' style='height: 50px; margin-right: 15px;'/>";
+    $html .= "<img src='{$logoPath}' alt='Logo' style='height: 50px; margin-right: 15px;'/>";
   }
   $html .= "<h2>Revenue Report</h2>
   </div>
@@ -214,7 +217,9 @@ require "../layouts/header.php";
     options: {
       responsive: true,
       plugins: {
-        legend: { position: 'top' },
+        legend: {
+          position: 'top'
+        },
         tooltip: {
           callbacks: {
             label: ctx => Number(ctx.parsed.y).toLocaleString('vi-VN') + 'đ'
